@@ -1,3 +1,5 @@
+#ifndef SYSTEM_H
+#define SYSTEM_H
 
 #include <EEPROM.h>
 #define EEPROM_SIZE 32
@@ -27,19 +29,16 @@ public:
 
 class OpenControlOS
 {
-    // singleton
 private:
-    OpenControlOS(/* args */) {}
-    ~OpenControlOS() {}
     // tasklist
     std::vector<OCOS_Task *> taskList;
 
 public:
-    static OpenControlOS &getInstance()
+    OpenControlOS(/* args */) {}
+    ~OpenControlOS()
     {
-        static OpenControlOS instance;
-        return instance;
     }
+
     OpenControlOS(OpenControlOS const &) = delete;
     void operator=(OpenControlOS const &) = delete;
 
@@ -49,19 +48,15 @@ public:
     }
     // members
 
-    static void loop(void *parameters)
+    void loop()
     {
-        OpenControlOS &OCOS = getInstance();
-
-        while (true)
+        // loop over tasks and execute them in timeslot to do stuff
+        for (auto task : this->taskList)
         {
-            // loop over tasks and execute them in timeslot to do stuff
-            for (auto task : OCOS.taskList)
-            {
-                // to implement individual delay or timeslot for every task
-                task->execute();
-            }
-            vTaskDelay(100 / portTICK_PERIOD_MS);
+            // to implement individual delay or timeslot for every task
+            task->execute();
         }
     }
 };
+
+#endif

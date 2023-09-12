@@ -1,3 +1,6 @@
+#ifndef MINI_GUI_H
+#define MINI_GUI_H
+
 // includes OLED
 #include <Arduino.h>
 #include <SPI.h>
@@ -85,13 +88,7 @@ public:
         }
 
         display.display();
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
-
-    static void taskEntryPoint(void *parameters)
-    {
-        mini_gui *gui = static_cast<mini_gui *>(parameters);
-        while (true)
-            gui->loop();
     }
 };
+
+#endif // !MINI_GUI_H
