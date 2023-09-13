@@ -1,6 +1,6 @@
 #include "entity.h"
 
-Entity::Entity(std::string name)
+Entity::Entity(const std::string name)
     : name(name)
 {
 }

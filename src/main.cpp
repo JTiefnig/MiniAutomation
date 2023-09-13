@@ -11,13 +11,13 @@
 #include <sstream>
 #include <iomanip>
 
-#include "config.h"
-#include "mqttClient.h"
-#include "mini_gui.h"
-#include "temperature_sensor.h"
-#include "output_entity.h"
-#include "system.h"
-#include "startup_handler.h"
+#include "system/config.h"
+#include "system/mqttClient.h"
+#include "system/mini_gui.h"
+#include "system/temperature_sensor.h"
+#include "system/output_entity.h"
+#include "system/control_task_manager.h"
+#include "system/startup_handler.h"
 
 #define VERSION "0.0.1"
 

@@ -26,7 +26,6 @@ public:
     menu_element(/* args */);
     ~menu_element();
 
-    virtual void process(const std::string message) = 0;
     virtual void draw(Adafruit_SSD1306 &display) = 0;
     virtual void up() = 0;
     virtual void down() = 0;
@@ -78,7 +77,7 @@ public:
 
         display.clearDisplay();
         display.setCursor(0, 2);
-        display.println("Hello World!"); // just testing
+        display.println("Testing"); // just testing
 
         Message message;
         while (xQueueReceive(InfoQueue, &message, 0) == pdTRUE)
@@ -88,6 +87,9 @@ public:
         }
 
         display.display();
+
+        // delay set for 10Hz refresh rate
+        vTaskDelay(100 / portTICK_PERIOD_MS);
     }
 };
 

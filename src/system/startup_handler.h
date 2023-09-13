@@ -2,14 +2,14 @@
 #define STARTUP_HANDLER_H
 #include <Arduino.h>
 #include "config.h"
-#include "system.h"
+#include "control_task_manager.h"
 #include "mini_gui.h"
 
 class StartupHandler
 {
 private:
     mini_gui gui;
-    OpenControlOS ContorlSystem;
+    ControlTaskManager ContorlSystem;
 
 public:
     StartupHandler()
@@ -26,7 +26,7 @@ public:
         gui.init();
 
         // startup tasks
-        xTaskCreatePinnedToCore(controlOSLoop,
+        xTaskCreatePinnedToCore(controlTasksLoop,
                                 "SystemLoop",
                                 2048,
                                 &ContorlSystem,
@@ -44,13 +44,12 @@ public:
     }
 
 private:
-    static void controlOSLoop(void *parameters)
+    static void controlTasksLoop(void *parameters)
     {
-        OpenControlOS *ocos = static_cast<OpenControlOS *>(parameters);
+        ControlTaskManager *ocos = static_cast<ControlTaskManager *>(parameters);
         while (true)
         {
             ocos->loop();
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
     }
 
@@ -60,7 +59,6 @@ private:
         while (true)
         {
             gui->loop();
-            vTaskDelay(1000 / portTICK_PERIOD_MS);
         }
     }
 };

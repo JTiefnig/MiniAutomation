@@ -67,7 +67,7 @@ public:
   {
   }
 
-  // append the message to the queue
+  // append the message to the queue // todo - use std::string
   void publish(const char *mytopic, const char *mymsg)
   {
     struct MQMessage mqMessage;
