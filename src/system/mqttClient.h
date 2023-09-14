@@ -24,14 +24,14 @@ private:
   PubSubClient client;
   WiFiClient espClient;
 
-protected:
-  const char *deviceId;
-  const char *ssid;
-  const char *password;
+  // todo enclose in a config struct
+  std::string deviceId;
+  std::string ssid;
+  std::string password;
+  std::string mqtt_server;
+  std::string mqtt_user;
+  std::string mqtt_password;
   uint16_t mqtt_port;
-  const char *mqtt_server;
-  const char *mqtt_user;
-  const char *mqtt_password;
 
 public:
   enum CONNECTION_STATUS
@@ -53,15 +53,17 @@ public:
 
   MQTTClient() : espClient(), client(espClient) {}
 
-  MQTTClient(const char *deviceId, const char *ssid,
-             const char *password, const char *mqtt_server, uint16_t mqtt_port,
-             const char *mqtt_user, const char *mqtt_password)
+  MQTTClient(std::string deviceId, std::string ssid,
+             std::string password, std::string mqtt_server,
+             uint16_t mqtt_port, std::string mqtt_user, std::string mqtt_password)
       : deviceId(deviceId), ssid(ssid), password(password),
         mqtt_server(mqtt_server), mqtt_user(mqtt_user), mqtt_password(mqtt_password), mqtt_port(mqtt_port),
         espClient(), client(espClient)
   {
     sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessage));
   }
+
+  // constructor with std::string parameters
 
   ~MQTTClient()
   {
@@ -83,7 +85,7 @@ public:
     int count = 0;
     while (WiFi.status() != WL_CONNECTED)
     {
-      WiFi.begin(ssid, password);
+      WiFi.begin(ssid.c_str(), password.c_str());
       vTaskDelay(500);
       count++;
       if (count > 20)
@@ -96,16 +98,19 @@ public:
 
     Serial.print(("Attempting MQTT connection to " + std::string(mqtt_server)).c_str());
 
-    client.setServer(mqtt_server, mqtt_port); // MQTT Server, - Por
+    client.setServer(mqtt_server.c_str(), mqtt_port); // MQTT Server, - Por
     for (count = 0; count < 10; count++)
     { // try to connect 10 time
-      if (client.connect(deviceId, mqtt_user, mqtt_password))
+      if (client.connect(deviceId.c_str(), mqtt_user.c_str(), mqtt_password.c_str()))
       {
         // function pointer to the receiveCallback function
         std::function<void(char *, byte *, unsigned int)> receiveCallback =
             std::bind(&MQTTClient::receiveCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
         client.setCallback(receiveCallback);
-        client.subscribe(deviceId);
+
+        // check to which topics i have to subscribe to
+        // client.subscribe(deviceId);
+
         return;
       }
       else

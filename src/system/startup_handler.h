@@ -4,24 +4,58 @@
 #include "config.h"
 #include "control_task_manager.h"
 #include "mini_gui.h"
+#include "mqttClient.h"
+#include <Preferences.h>
 
 class StartupHandler
 {
 private:
-    mini_gui gui;
-    ControlTaskManager ContorlSystem;
+    MiniGUI gui;
+    ControlTaskManager contorlSystem;
+    MQTTClient mqttClient;
 
 public:
     StartupHandler()
     {
     }
+
     ~StartupHandler()
     {
     }
 
+    // get mqtt client
+    MQTTClient &getMqttClient()
+    {
+        return this->mqttClient;
+    }
+    // get control system
+    ControlTaskManager &getControlSystem()
+    {
+        return this->contorlSystem;
+    }
+    // get gui
+    MiniGUI &getGui()
+    {
+        return this->gui;
+    }
+
     void init()
     {
-        // init tasks
+        // load preferences
+        Preferences preferences;
+        preferences.begin("mplc", false);
+
+        // MQTTClient(String client_id, String wifi_ssid, String wifi_password, String mqtt_server, uint16_t mqtt_port, String mqtt_user, String mqtt_password)
+        mqttClient = MQTTClient(
+            preferences.getString("client_id", CLIENT_ID).c_str(),
+            preferences.getString("wifi_ssid", WIFI_SSID).c_str(),
+            preferences.getString("wifi_password", WIFI_PASSWORD).c_str(),
+            preferences.getString("mqtt_server", MQTT_SERVER).c_str(),
+            preferences.getUInt("mqtt_port", MQTT_PORT),
+            preferences.getString("mqtt_user", MQTT_USER).c_str(),
+            preferences.getString("mqtt_password", MQTT_PASSWORD).c_str());
+
+        mqttClient.reconnect();
 
         gui.init();
 
@@ -29,7 +63,7 @@ public:
         xTaskCreatePinnedToCore(controlTasksLoop,
                                 "SystemLoop",
                                 2048,
-                                &ContorlSystem,
+                                &contorlSystem,
                                 1,
                                 NULL,
                                 1);
@@ -55,7 +89,7 @@ private:
 
     static void miniGuiLoop(void *parameters)
     {
-        mini_gui *gui = static_cast<mini_gui *>(parameters);
+        MiniGUI *gui = static_cast<MiniGUI *>(parameters);
         while (true)
         {
             gui->loop();

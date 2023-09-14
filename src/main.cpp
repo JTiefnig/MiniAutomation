@@ -21,9 +21,7 @@
 
 #define VERSION "0.0.1"
 
-//  mqtt
-MQTTClient client(CLIENT_ID, WIFI_SSID, WIFI_PASSWORD, MQTT_SERVER, MQTT_PORT, MQTT_USER, MQTT_PASSWORD);
-
+// handles Startup
 StartupHandler startup;
 
 void setup()
@@ -33,14 +31,13 @@ void setup()
     Serial.println(VERSION);
     pinMode(LED_BUILTIN, OUTPUT); // debug Status initailisation
 
-    client.reconnect(); //
     startup.init();
 }
 
 void loop()
 {
-    client.loop();
 
+    startup.getMqttClient().loop();
     // MQTT client
     // ArduinoOTA.handle();
 }

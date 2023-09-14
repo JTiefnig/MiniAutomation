@@ -17,14 +17,14 @@
 
 // implement some kind of allert message queue
 
-class menu_element
+class MenuElement
 {
 private:
-    std::vector<menu_element *> children;
+    std::vector<MenuElement *> children;
 
 public:
-    menu_element(/* args */);
-    ~menu_element();
+    MenuElement(/* args */);
+    ~MenuElement();
 
     virtual void draw(Adafruit_SSD1306 &display) = 0;
     virtual void up() = 0;
@@ -49,18 +49,18 @@ struct Message
     // message queue
 };
 
-class mini_gui
+class MiniGUI
 {
 private:
     Adafruit_SSD1306 display;
     QueueHandle_t InfoQueue;
 
 public:
-    mini_gui(/* args */) : display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET)
+    MiniGUI(/* args */) : display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET)
     {
         InfoQueue = xQueueCreate(10, sizeof(Message));
     }
-    ~mini_gui() {}
+    ~MiniGUI() {}
 
     void init()
     {
