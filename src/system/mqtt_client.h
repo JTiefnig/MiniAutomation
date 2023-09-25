@@ -1,5 +1,5 @@
-#ifndef MQTTCLIENT_H
-#define MQTTCLIENT_H
+#ifndef MQTT_CLIENT_H
+#define MQTT_CLIENT_H
 
 // included wifi
 #include <Arduino.h>
@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 #include "config.h"
+#include "helpers.h"
 
 struct MQMessage
 {
@@ -109,7 +110,7 @@ public:
         client.setCallback(receiveCallback);
 
         // check to which topics i have to subscribe to
-        // client.subscribe(deviceId);
+        client.subscribe(std::string((deviceId + "/*")).c_str());
 
         return;
       }
@@ -148,11 +149,12 @@ public:
 
   void receiveCallback(char *topic, byte *message, unsigned int length)
   {
+    // debugging
     Serial.print("topic: ");
     Serial.print(topic);
     Serial.print("Message: ");
-    std::string messageTemp;
 
+    std::string messageTemp;
     for (int i = 0; i < length; i++)
     {
       Serial.print((char)message[i]);
@@ -170,10 +172,13 @@ public:
         tokens.push_back(token);
       }
 
+      // Deviceid / entity / function
       for (auto token : tokens)
       {
         Serial.println(token.c_str());
       }
+
+            // set entity state
     }
     catch (const std::exception &e)
     {

@@ -6,13 +6,13 @@
 #include <DallasTemperature.h>
 #include <string>
 #include <sstream>
-#include "mqttClient.h"
+#include "mqtt_client.h"
 #include "entity.h"
 #include "temperature_sensor_handler.h"
 
 class TemperatureSensorHandler;
 
-class TemperatureEntity : public Entity
+class TemperatureEntity : public EntityBase
 {
 private:
     uint8_t id;

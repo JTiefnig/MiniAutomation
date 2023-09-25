@@ -6,7 +6,7 @@
 ShiftRegister74HC595<2> sr(19, 15, 5); // Put this in main file
 
 template <int N>
-class OutEntity : public Entity
+class OutEntity : public EntityBase
 {
 public:
     enum State
@@ -22,7 +22,7 @@ private:
 
 public:
     OutEntity(std::string name, int pin)
-        : Entity(name), pin(pin)
+        : EntityBase(name), pin(pin)
     {
     }
     ~OutEntity() {}

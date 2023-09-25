@@ -1,7 +1,7 @@
 #ifndef CONTROL_TASK_H
 #define CONTROL_TASK_H
 #include <Arduino.h>
-#include "../system/control_task_manager.h"
+#include "../system/control_task_scheduler.h"
 
 class ControlTask
 {

@@ -1,5 +1,5 @@
-#ifndef CONTROL_TASK_MANAGER_H
-#define CONTROL_TASK_MANAGER_H
+#ifndef CONTROL_TASK_SCHEDULER_H
+#define CONTROL_TASK_SCHEDULER_H
 
 #include <Arduino.h>
 #include <vector>
@@ -8,7 +8,7 @@
 
 class ControlTask;
 
-class ControlTaskManager
+class ControlTaskScheduler
 {
 private:
     // tasklist
@@ -47,8 +47,8 @@ private:
     }
 
 public:
-    ControlTaskManager(/* args */) {}
-    ~ControlTaskManager()
+    ControlTaskScheduler(/* args */) {}
+    ~ControlTaskScheduler()
     {
     }
 

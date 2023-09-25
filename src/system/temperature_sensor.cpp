@@ -6,7 +6,7 @@ void TemperatureEntity::process(const std::string message)
 }
 
 TemperatureEntity::TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors)
-    : Entity(name), id(id), sensors(sensors)
+    : EntityBase(name), id(id), sensors(sensors)
 {
 }
 

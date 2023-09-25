@@ -74,7 +74,6 @@ public:
 
     void loop()
     {
-
         display.clearDisplay();
         display.setCursor(0, 2);
         display.println("Testing"); // just testing

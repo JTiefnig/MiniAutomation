@@ -1,15 +1,20 @@
 #include "entity.h"
 
-Entity::Entity(const std::string name)
+EntityBase::EntityBase(const std::string name)
     : name(name)
 {
 }
 
-Entity::~Entity()
+EntityBase::~EntityBase()
 {
 }
 
-std::string Entity::getName() const
+std::string EntityBase::getName() const
 {
     return this->name;
+}
+
+void EntityBase::addCallback(std::function<void()> callback)
+{
+    this->callbacks.add(std::move(callback));
 }
