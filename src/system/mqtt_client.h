@@ -10,22 +10,16 @@
 #include <vector>
 #include "config.h"
 #include "helpers.h"
+#include "mqtt_component.h"
 
 struct MQMessage
 {
-  char topic[32];
-  char message[32];
+  std::string topic;
+  std::string message;
 };
 
-class MQTTClient
+struct ConnectionCredentials
 {
-private:
-  QueueHandle_t sendQueue;
-  const static int send_queue_len = 10;
-  PubSubClient client;
-  WiFiClient espClient;
-
-  // todo enclose in a config struct
   std::string deviceId;
   std::string ssid;
   std::string password;
@@ -33,6 +27,17 @@ private:
   std::string mqtt_user;
   std::string mqtt_password;
   uint16_t mqtt_port;
+};
+
+class MQTTClient
+{
+private:
+  QueueHandle_t sendQueue;
+  const static uint16_t send_queue_len = 100;
+  PubSubClient client;
+  WiFiClient wifiClient;
+
+  ConnectionCredentials credentials;
 
 public:
   enum CONNECTION_STATUS
@@ -46,22 +51,20 @@ public:
   {
     if (WiFi.status() != WL_CONNECTED)
       return CONNECTION_STATUS::WIFI_DISCONNECTED;
-    if (!client.connected())
+    if (this->client.connected() == false)
       return CONNECTION_STATUS::MQTT_CLIENT_DISCONNECTED;
 
     return CONNECTION_STATUS::CONNECTED;
   }
 
-  MQTTClient() : espClient(), client(espClient) {}
-
-  MQTTClient(std::string deviceId, std::string ssid,
-             std::string password, std::string mqtt_server,
-             uint16_t mqtt_port, std::string mqtt_user, std::string mqtt_password)
-      : deviceId(deviceId), ssid(ssid), password(password),
-        mqtt_server(mqtt_server), mqtt_user(mqtt_user), mqtt_password(mqtt_password), mqtt_port(mqtt_port),
-        espClient(), client(espClient)
+  MQTTClient() : wifiClient(), client(wifiClient), credentials()
   {
-    sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessage));
+    sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessage *));
+  }
+
+  MQTTClient(const ConnectionCredentials &credentials) : wifiClient(), client(wifiClient), credentials(credentials)
+  {
+    sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessage *));
   }
 
   // constructor with std::string parameters
@@ -71,124 +74,82 @@ public:
   }
 
   // append the message to the queue // todo - use std::string
-  void publish(const char *mytopic, const char *mymsg)
+  void publish(const char *sendtopic, const char *sendmsg)
   {
-    struct MQMessage mqMessage;
-    strcpy(mqMessage.topic, mytopic);
-    strcpy(mqMessage.message, mymsg);
-
-    xQueueSend(sendQueue, &mqMessage, 0);
+    auto msg = new MQMessage({sendtopic, sendmsg});
+    xQueueSend(sendQueue, &msg, 0);
   }
 
   void reconnect()
   {
-    Serial.println("Attempting WIFI connection...");
-    int count = 0;
+
     while (WiFi.status() != WL_CONNECTED)
     {
-      WiFi.begin(ssid.c_str(), password.c_str());
-      vTaskDelay(500);
-      count++;
-      if (count > 20)
-      {
-        Serial.println("Could not connect to WiFi. Restarting.");
-        ESP.restart();
-      }
+      WiFi.begin(credentials.ssid.c_str(), credentials.password.c_str());
+      delay(500);
+      Serial.print(".");
     }
-    Serial.println("connected to WiFi");
 
-    Serial.print(("Attempting MQTT connection to " + std::string(mqtt_server)).c_str());
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
 
-    client.setServer(mqtt_server.c_str(), mqtt_port); // MQTT Server, - Por
-    for (count = 0; count < 10; count++)
-    { // try to connect 10 time
-      if (client.connect(deviceId.c_str(), mqtt_user.c_str(), mqtt_password.c_str()))
-      {
-        // function pointer to the receiveCallback function
-        std::function<void(char *, byte *, unsigned int)> receiveCallback =
-            std::bind(&MQTTClient::receiveCallback, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
-        client.setCallback(receiveCallback);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-        // check to which topics i have to subscribe to
-        client.subscribe(std::string((deviceId + "/*")).c_str());
+    client.setServer(credentials.mqtt_server.c_str(), credentials.mqtt_port);
+    // subcribe to all
 
-        return;
-      }
-      else
-      {
-        Serial.print("failed with state ");
-        Serial.print(client.state());
-        vTaskDelay(500);
-      }
-      vTaskDelay(500);
-    }
-    // if all attempts failed, then restart
-    // ESP.restart();
-    Serial.println("Could not connect to MQTT Server.");
+    client.setCallback([this](char *topic, byte *payload, unsigned int length)
+                       { this->receiveCallback(topic, payload, length); });
+
+    client.connect(credentials.deviceId.c_str(), credentials.mqtt_user.c_str(), credentials.mqtt_password.c_str());
+
+    client.subscribe("#");
   }
 
   void loop()
   {
-    // Runs as a task on Core zero ir Core 1 but crashes either way
-    MQMessage myMessage;
-    // if sendQueue has items to send
-    while (xQueueReceive(sendQueue, &myMessage, 0) == pdTRUE)
+    if (getStatus() != CONNECTION_STATUS::CONNECTED)
     {
-      // Check connections
-      if (getStatus() != CONNECTION_STATUS::CONNECTED)
-      {
-        reconnect();
-      }
-
-      client.publish(myMessage.topic, myMessage.message);
+      reconnect();
     }
 
-    // receive messages
+    // Runs as a task on Core zero ir Core 1 but crashes either way
+    MQMessage *currentMessage;
+    // if sendQueue has items to send
+    while (xQueueReceive(sendQueue, &currentMessage, 0) == pdTRUE)
+    {
+      Serial.print("Sending message: ");
+      Serial.print(currentMessage->topic.c_str());
+      Serial.print(" ");
+      Serial.println(currentMessage->message.c_str());
+
+      client.publish(currentMessage->topic.c_str(), currentMessage->message.c_str());
+      delete currentMessage;
+    }
+
     client.loop();
   }
 
   void receiveCallback(char *topic, byte *message, unsigned int length)
   {
-    // debugging
-    Serial.print("topic: ");
+    // write to serial
+    Serial.print("Message arrived on topic: ");
     Serial.print(topic);
-    Serial.print("Message: ");
-
-    std::string messageTemp;
+    Serial.print(". Message: ");
+    String messageTemp;
     for (int i = 0; i < length; i++)
     {
       Serial.print((char)message[i]);
       messageTemp += (char)message[i];
     }
-    Serial.println();
-
-    try
-    {
-      std::vector<std::string> tokens;
-      std::string token;
-      std::istringstream tokenStream(topic);
-      while (std::getline(tokenStream, token, '/'))
-      {
-        tokens.push_back(token);
-      }
-
-      // Deviceid / entity / function
-      for (auto token : tokens)
-      {
-        Serial.println(token.c_str());
-      }
-
-            // set entity state
-    }
-    catch (const std::exception &e)
-    {
-      // invalid argument
-      return;
-    }
+    Serial.println(messageTemp.c_str());
   }
 
-  void init()
+  void init(const ConnectionCredentials &credentials)
   {
+    this->credentials = credentials;
     reconnect();
   }
 };

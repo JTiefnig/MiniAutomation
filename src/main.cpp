@@ -38,6 +38,13 @@ void loop()
 {
 
     startup.getMqttClient().loop();
+
+    // startup.getGui().addMessage({"Test", MessageType::INFO, "Testing", 2000});
+    // // serial receive to string
+    // std::string input = Serial.readStringUntil('\n').c_str();
+    // startup.getGui().addMessage({"input", MessageType::INFO, input, 10000});
+
     // MQTT client
     // ArduinoOTA.handle();
+    // vTaskDelay(1000);
 }

@@ -7,6 +7,9 @@
 #include <Wire.h>
 #include <Adafruit_SSD1306.h>
 #include <vector>
+#include <map>
+#include <string>
+#include <algorithm>
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -44,8 +47,10 @@ enum MessageType
 
 struct Message
 {
+    std::string title;
     MessageType type;
-    std::string text;
+    std::string msg;
+    int displayTime;
     // message queue
 };
 
@@ -54,11 +59,12 @@ class MiniGUI
 private:
     Adafruit_SSD1306 display;
     QueueHandle_t InfoQueue;
+    std::map<std::string, Message> msgs;
 
 public:
     MiniGUI(/* args */) : display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET)
     {
-        InfoQueue = xQueueCreate(10, sizeof(Message));
+        InfoQueue = xQueueCreate(10, sizeof(Message *));
     }
     ~MiniGUI() {}
 
@@ -72,17 +78,37 @@ public:
         display.setCursor(0, 2);
     }
 
+    // should later serve as a gerneral interface for all updates of ui elements
+    void addMessage(Message message)
+    {
+        auto msg = new Message(message);
+        xQueueSend(InfoQueue, &msg, 0);
+    }
+
     void loop()
     {
         display.clearDisplay();
         display.setCursor(0, 2);
-        display.println("Testing"); // just testing
+        display.println("MPLC-Testing");
 
-        Message message;
+        Message *message;
         while (xQueueReceive(InfoQueue, &message, 0) == pdTRUE)
         {
-            // display message
-            display.println(message.text.c_str());
+            msgs[message->title] = Message(*message);
+            delete message;
+        }
+
+        // display all messages
+        for (auto &msg : msgs)
+        {
+            display.println(msg.second.msg.c_str());
+            // deduct display time
+            msg.second.displayTime -= 100;
+            // remove message if display time is over
+            if (msg.second.displayTime <= 0)
+            {
+                msgs.erase(msg.first);
+            }
         }
 
         display.display();

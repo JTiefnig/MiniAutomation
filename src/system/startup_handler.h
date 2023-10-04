@@ -15,7 +15,7 @@ private:
     MQTTClient mqttClient;
 
 public:
-    StartupHandler()
+    StartupHandler() : gui(), contorlSystem(), mqttClient()
     {
     }
 
@@ -42,22 +42,23 @@ public:
     void init()
     {
         // load preferences
-        Preferences preferences;
-        preferences.begin("mplc", false);
-        // MQTTClient(String client_id, String wifi_ssid, String wifi_password, String mqtt_server, uint16_t mqtt_port, String mqtt_user, String mqtt_password)
-        mqttClient = MQTTClient(
-            preferences.getString("client_id", CLIENT_ID).c_str(),
-            preferences.getString("wifi_ssid", WIFI_SSID).c_str(),
-            preferences.getString("wifi_password", WIFI_PASSWORD).c_str(),
-            preferences.getString("mqtt_server", MQTT_SERVER).c_str(),
-            preferences.getUInt("mqtt_port", MQTT_PORT),
-            preferences.getString("mqtt_user", MQTT_USER).c_str(),
-            preferences.getString("mqtt_password", MQTT_PASSWORD).c_str());
-        preferences.end();
+        // Preferences preferences;
+        // preferences.begin("mplc", false);
+        // ConnectionCredentials credentials = {
+        //     preferences.getString("client_id", CLIENT_ID).c_str(),
+        //     preferences.getString("wifi_ssid", WIFI_SSID).c_str(),
+        //     preferences.getString("wifi_password", WIFI_PASSWORD).c_str(),
+        //     preferences.getString("mqtt_server", MQTT_SERVER).c_str(),
+        //     preferences.getString("mqtt_user", MQTT_USER).c_str(),
+        //     preferences.getString("mqtt_password", MQTT_PASSWORD).c_str(),
+        //     preferences.getUInt("mqtt_port", MQTT_PORT)};
+        // preferences.end();
 
-        mqttClient.reconnect();
+        auto credentials = ConnectionCredentials({CLIENT_ID, WIFI_SSID, WIFI_PASSWORD, MQTT_SERVER, MQTT_USER, MQTT_PASSWORD, MQTT_PORT});
 
         gui.init();
+
+        Serial.println("Starting Control System");
 
         // startup tasks
         xTaskCreatePinnedToCore(controlTasksLoop,
@@ -75,6 +76,10 @@ public:
                                 1,
                                 NULL,
                                 1);
+
+        // init mqtt client
+
+        mqttClient.init(credentials);
     }
 
 private:

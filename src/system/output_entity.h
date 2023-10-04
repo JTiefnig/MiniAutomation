@@ -11,9 +11,12 @@ class OutEntity : public EntityBase
 public:
     enum State
     {
-        ON,
+        ON = 0,
         OFF
     };
+
+    // defnie state names as 2 const char pointers static
+    static const char *stateNames[];
 
 private:
     int pin;
@@ -29,11 +32,11 @@ public:
 
     void process(const std::string message)
     {
-        if (message == "ON")
+        if (message == stateNames[ON])
         {
             sr.set(pin, HIGH);
         }
-        else if (message == "OFF")
+        else if (message == stateNames[OFF])
         {
             sr.set(pin, LOW);
         }
@@ -41,7 +44,10 @@ public:
 
     void set(State state)
     {
-        this->state = state;
+        if (state != this->state)
+        {
+            this->state = state;
+        }
     }
 
     State get()
@@ -49,3 +55,6 @@ public:
         return state;
     }
 };
+
+template <int N>
+const char *OutEntity<N>::stateNames[] = {"ON", "OFF"};
