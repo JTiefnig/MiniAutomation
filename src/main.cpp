@@ -17,12 +17,12 @@
 #include "system/temperature_sensor.h"
 #include "system/output_entity.h"
 #include "system/control_task_scheduler.h"
-#include "system/startup_handler.h"
+#include "system/application.h"
 
 #define VERSION "0.0.1"
 
 // handles Startup
-StartupHandler startup;
+extern Application app;
 
 void setup()
 {
@@ -31,13 +31,18 @@ void setup()
     Serial.println(VERSION);
     pinMode(LED_BUILTIN, OUTPUT); // debug Status initailisation
 
-    startup.init();
+    app.init();
+
+
+    app.getControlSystem().addTask(new ControlTask([]() {
+        app.getGui().addMessage({"Test", MessageType::INFO, "Testing", 2000});
+    }, 1000));
 }
 
 void loop()
 {
 
-    startup.getMqttClient().loop();
+    app.getMqttClient().loop();
 
     // startup.getGui().addMessage({"Test", MessageType::INFO, "Testing", 2000});
     // // serial receive to string

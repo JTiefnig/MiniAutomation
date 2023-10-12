@@ -21,7 +21,7 @@ public:
 private:
     int pin;
     State state;
-    ShiftRegister74HC595<N> &sr;
+    const ShiftRegister74HC595<N> &sr;
 
 public:
     OutEntity(std::string name, int pin)

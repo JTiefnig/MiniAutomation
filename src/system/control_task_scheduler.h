@@ -6,13 +6,11 @@
 #include "config.h"
 #include "../control_tasks/control_task.h"
 
-class ControlTask;
-
 class ControlTaskScheduler
 {
 private:
     // tasklist
-    std::vector<ControlTask *> tasks;
+    std::vector<ControlTaskBase *> tasks;
     uint16_t hcfInterval = 1000; // default 1 sec
     uint16_t largestInterval = 0;
     uint64_t cycleTime = 0;
@@ -50,9 +48,13 @@ public:
     ControlTaskScheduler(/* args */) {}
     ~ControlTaskScheduler()
     {
+        for (auto task : this->tasks)
+        {
+            delete task;
+        }
     }
 
-    void addTask(ControlTask *task)
+    void addTask(ControlTaskBase *task)
     {
         tasks.push_back(task);
 
@@ -61,6 +63,17 @@ public:
             largestInterval = task->getExecutionInterval();
         }
     }
+
+    void addTask(std::function<void()> task, uint16_t executionInterval)
+    {
+        tasks.push_back(new ControlTask(task, executionInterval));
+
+        if (executionInterval > largestInterval)
+        {
+            largestInterval = executionInterval;
+        }
+    }
+
     // members
 
     void loop()
