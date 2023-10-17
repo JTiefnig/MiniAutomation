@@ -33,7 +33,7 @@ void Application::init()
 
     Preferences preferences;
     preferences.begin("mplc", false);
-    ConnectionCredentials credentials = {
+    MQTTClient::ConnectionCredentials credentials = {
         preferences.getString("client_id", CLIENT_ID).c_str(),
         preferences.getString("wifi_ssid", WIFI_SSID).c_str(),
         preferences.getString("wifi_password", WIFI_PASSWORD).c_str(),
@@ -65,7 +65,6 @@ void Application::init()
                             1);
 
     // init mqtt client
-
     mqttClient.init(credentials);
 }
 

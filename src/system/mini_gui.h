@@ -45,7 +45,7 @@ enum MessageType
     ERROR
 };
 
-struct Message
+struct GuiMessage
 {
     std::string title;
     MessageType type;
@@ -59,12 +59,12 @@ class MiniGUI
 private:
     Adafruit_SSD1306 display;
     QueueHandle_t InfoQueue;
-    std::map<std::string, Message> msgs;
+    std::map<std::string, GuiMessage> msgs;
 
 public:
     MiniGUI(/* args */) : display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET)
     {
-        InfoQueue = xQueueCreate(10, sizeof(Message *));
+        InfoQueue = xQueueCreate(10, sizeof(GuiMessage *));
     }
     ~MiniGUI() {}
 
@@ -79,9 +79,9 @@ public:
     }
 
     // should later serve as a gerneral interface for all updates of ui elements
-    void addMessage(Message message)
+    void addMessage(GuiMessage message)
     {
-        auto msg = new Message(message);
+        auto msg = new GuiMessage(message);
         xQueueSend(InfoQueue, &msg, 0);
     }
 
@@ -91,10 +91,10 @@ public:
         display.setCursor(0, 2);
         display.println("MPLC-Testing");
 
-        Message *message;
+        GuiMessage *message;
         while (xQueueReceive(InfoQueue, &message, 0) == pdTRUE)
         {
-            msgs[message->title] = Message(*message);
+            msgs[message->title] = GuiMessage(*message);
             delete message;
         }
 

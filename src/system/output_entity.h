@@ -1,12 +1,18 @@
+#include <Arduino.h>
 #include "entity.h"
+#include "config.h"
+#include "mqtt_component.h"
 #include <string>
 #include <ShiftRegister74HC595.h>
+#include "application.h"
 
 // parameters: <number of shift registers> (data pin, clock pin, latch pin)
-ShiftRegister74HC595<2> sr(19, 15, 5); // Put this in main file
+// refactor incapsolate in entity handler class
+ShiftRegister74HC595<NUM_SR> sr(PIN_SR_DATA, PIN_SR_CLOCK, PIN_SR_LATCH);
 
-template <int N>
-class OutEntity : public EntityBase
+extern Application app;
+
+class OutEntity : public EntityBase, public MqttComponent
 {
 public:
     enum State
@@ -21,14 +27,17 @@ public:
 private:
     int pin;
     State state;
-    const ShiftRegister74HC595<N> &sr;
 
 public:
     OutEntity(std::string name, int pin)
         : EntityBase(name), pin(pin)
     {
+        app.getMqttClient().addComponent(this);
     }
-    ~OutEntity() {}
+    ~OutEntity()
+    {
+        app.getMqttClient().removeComponent(this);
+    }
 
     void process(const std::string message)
     {
@@ -48,6 +57,47 @@ public:
         {
             this->state = state;
         }
+        if (state == ON)
+        {
+            sr.set(pin, HIGH);
+        }
+        else if (state == OFF)
+        {
+            sr.set(pin, LOW);
+        }
+        publishState(app.getMqttClient());
+    }
+
+    void publishState(MQTTClient &client) override
+    {
+        std::string stateTopic = client.getDeviceId() + "/" + topic() + "/state";
+        client.publish(stateTopic.c_str(), stateNames[state]);
+    }
+
+    bool processMessage(const MQMessage &msg) override
+    {
+        std::vector<std::string> tokens = msg.splitTopic();
+        if (tokens.size() != 3)
+            return false;
+
+        if (tokens[1] == topic() && tokens[2] == "set")
+        {
+            if (msg.message == stateNames[ON])
+            {
+                set(ON);
+            }
+            else if (msg.message == stateNames[OFF])
+            {
+                set(OFF);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    std::string topic() override
+    {
+        return this->getName();
     }
 
     State get()
@@ -56,5 +106,4 @@ public:
     }
 };
 
-template <int N>
-const char *OutEntity<N>::stateNames[] = {"ON", "OFF"};
+const char *OutEntity::stateNames[] = {"ON", "OFF"};

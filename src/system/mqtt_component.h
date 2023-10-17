@@ -3,26 +3,20 @@
 
 #include <string>
 #include "mqtt_client.h"
+#include "mqtt_message.h"
 
 class MQTTClient;
-struct MqttInMessage;
 
 class MqttComponent
 {
-protected:
-    const MQTTClient &client;
-
 public:
     virtual std::string topic() = 0;
 
-    virtual bool processMessage(const MqttInMessage &msg) = 0;
+    virtual bool processMessage(const MQMessage &msg) = 0;
 
-    virtual void publishState() = 0;
+    virtual void publishState(MQTTClient &client) = 0;
 
-    MqttComponent(const MQTTClient &client)
-        : client(client)
-    {
-    }
+    MqttComponent();
     ~MqttComponent();
 };
 

@@ -18,7 +18,8 @@ public:
 
     virtual void process(const std::string message) = 0;
 
-    void addCallback(std::function<void()> callback);
+    void addCallback(std::function<void()> callback); // on change
+    
 };
 
 #endif

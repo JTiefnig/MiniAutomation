@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 #include <functional>
+#include <sstream>
+#include <iterator>
 
 template <typename... X>
 class CallbackManager;
@@ -28,7 +30,5 @@ public:
 protected:
     std::vector<std::function<void(Ts...)>> callbacks_;
 };
-
-// mqtt callback
 
 #endif

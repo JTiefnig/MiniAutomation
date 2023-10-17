@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "mqtt_client.h"
+#include "mqtt_component.h"
 #include "helpers.h"
 #include "config.h"
 #include "application.h"
@@ -38,7 +39,7 @@ void MQTTClient::publish(const char *sendtopic, const char *sendmsg)
 
 void MQTTClient::reconnect()
 {
-    Serial.print(("Cnnect Wifi:" + credentials.ssid + " " + credentials.password).c_str());
+    Serial.print(("Connect Wifi:" + credentials.ssid + " " + credentials.password).c_str());
     WiFi.mode(WIFI_STA);
     while (WiFi.status() != WL_CONNECTED)
     {
@@ -110,5 +111,11 @@ void MQTTClient::receiveCallback(char *topic, byte *message, unsigned int length
 
     MQMessage msg = {topic, messageTemp};
 
-    app.getGui().addMessage({"MQTT", MessageType::INFO, msg.topic + " " + msg.message, 2000});
+    app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.message, 3000});
+
+    // todo: improve message rooting by custom mqtt topic callback manager
+    for (auto &component : this->components)
+    {
+        component->processMessage(msg);
+    }
 }

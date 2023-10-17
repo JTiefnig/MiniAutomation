@@ -12,33 +12,30 @@
 #include "helpers.h"
 #include "mqtt_component.h"
 
-struct MQMessage
-{
-  std::string topic;
-  std::string message;
-};
-
-struct ConnectionCredentials
-{
-  std::string deviceId;
-  std::string ssid;
-  std::string password;
-  std::string mqtt_server;
-  std::string mqtt_user;
-  std::string mqtt_password;
-  uint16_t mqtt_port;
-};
+class MqttComponent;
 
 class MQTTClient
 {
+public:
+  struct ConnectionCredentials
+  {
+    std::string deviceId;
+    std::string ssid;
+    std::string password;
+    std::string mqtt_server;
+    std::string mqtt_user;
+    std::string mqtt_password;
+    uint16_t mqtt_port;
+  };
+
 private:
   QueueHandle_t sendQueue;
   const static uint16_t send_queue_len = 100;
   PubSubClient client;
   WiFiClient wifiClient;
-  CallbackManager<void()> callback;
-
   ConnectionCredentials credentials;
+
+  std::vector<MqttComponent *> components;
 
 public:
   enum CONNECTION_STATUS
@@ -50,7 +47,6 @@ public:
 
   CONNECTION_STATUS getStatus();
 
-
   MQTTClient();
 
   MQTTClient(const ConnectionCredentials &credentials);
@@ -58,6 +54,11 @@ public:
   // constructor with std::string parameters
 
   ~MQTTClient();
+
+  std::string getDeviceId()
+  {
+    return credentials.deviceId;
+  }
 
   // append the message to the queue // todo - use std::string
   void publish(const char *sendtopic, const char *sendmsg);
@@ -72,6 +73,16 @@ public:
   {
     this->credentials = credentials;
     reconnect();
+  }
+
+  void addComponent(MqttComponent *component)
+  {
+    components.push_back(component);
+  }
+
+  void removeComponent(MqttComponent *component)
+  {
+    components.erase(std::remove(components.begin(), components.end(), component), components.end());
   }
 };
 
