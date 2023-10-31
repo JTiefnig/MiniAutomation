@@ -11,6 +11,7 @@
 #include "config.h"
 #include "helpers.h"
 #include "mqtt_component.h"
+#include "mqtt_message.h"
 
 class MqttComponent;
 
@@ -55,13 +56,13 @@ public:
 
   ~MQTTClient();
 
-  std::string getDeviceId()
+  std::string getDeviceId() const
   {
     return credentials.deviceId;
   }
 
   // append the message to the queue // todo - use std::string
-  void publish(const char *sendtopic, const char *sendmsg);
+  void publish(MQMessageBase *msg);
 
   void reconnect();
 

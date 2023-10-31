@@ -37,10 +37,6 @@ void setup()
                                                    { app.getGui().addMessage({"Test", MessageType::INFO, "Testing", 2000}); },
                                                    1000));
 
-    for (int i = 0; i < 8; i++)
-    {
-        new OutEntity(std::to_string(i + 1), i);
-    }
 }
 
 void loop()

@@ -19,21 +19,20 @@ MQTTClient::CONNECTION_STATUS MQTTClient::getStatus()
 
 MQTTClient::MQTTClient() : wifiClient(), client(wifiClient), credentials()
 {
-    sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessage *));
+    sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessageBase *));
 }
 
 MQTTClient::MQTTClient(const ConnectionCredentials &credentials) : wifiClient(), client(wifiClient), credentials(credentials)
 {
-    sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessage *));
+    sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessageBase *));
 }
 
 MQTTClient::~MQTTClient()
 {
 }
 
-void MQTTClient::publish(const char *sendtopic, const char *sendmsg)
+void MQTTClient::publish(MQMessageBase *msg)
 {
-    auto msg = new MQMessage({sendtopic, sendmsg});
     xQueueSend(sendQueue, &msg, 0);
 }
 
@@ -46,6 +45,8 @@ void MQTTClient::reconnect()
         WiFi.begin(credentials.ssid.c_str(), credentials.password.c_str());
         delay(500);
         Serial.print(".");
+        // to gui
+        app.getGui().addMessage({"WiFi", MessageType::INFO, "Connecting to WiFi", 1000});
     }
 
     Serial.println("");
@@ -79,15 +80,11 @@ void MQTTClient::loop()
         reconnect();
 
     //
-    MQMessage *currentMessage;
+    MQMessageBase *currentMessage;
     while (xQueueReceive(sendQueue, &currentMessage, 0) == pdTRUE)
     {
-        Serial.print("Sending message: ");
-        Serial.print(currentMessage->topic.c_str());
-        Serial.print(" ");
-        Serial.println(currentMessage->message.c_str());
+        currentMessage->publish(client);
 
-        client.publish(currentMessage->topic.c_str(), currentMessage->message.c_str());
         delete currentMessage;
     }
 
@@ -111,7 +108,7 @@ void MQTTClient::receiveCallback(char *topic, byte *message, unsigned int length
 
     MQMessage msg = {topic, messageTemp};
 
-    app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.message, 3000});
+    app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
 
     // todo: improve message rooting by custom mqtt topic callback manager
     for (auto &component : this->components)

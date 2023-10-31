@@ -9,10 +9,11 @@
 #include "mqtt_client.h"
 #include "entity.h"
 #include "temperature_sensor_handler.h"
+#include "mqtt_component.h"
 
 class TemperatureSensorHandler;
 
-class TemperatureEntity : public EntityBase
+class TemperatureEntity : public EntityBase, public MqttComponent
 {
 private:
     uint8_t id;
@@ -24,6 +25,12 @@ public:
     TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors);
 
     ~TemperatureEntity();
+
+    virtual std::string topic();
+
+    virtual bool processMessage(const MQMessage &msg) override;
+
+    virtual void publishState(MQTTClient &client);
 
     std::string addressToString(DeviceAddress deviceAddress);
 

@@ -1,4 +1,11 @@
 #include "temperature_sensor_handler.h"
+#include "control_task_scheduler.h"
+#include "mqtt_client.h"
+#include "application.h"
+#include <iomanip>
+#include <sstream>
+
+extern Application app;
 
 TemperatureSensorHandler::TemperatureSensorHandler()
 {
@@ -6,19 +13,36 @@ TemperatureSensorHandler::TemperatureSensorHandler()
     _sensors = new DallasTemperature(_wire);
 }
 
+std::string TemperatureSensorHandler::addressToString(DeviceAddress deviceAddress)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (int i = 0; i < 8; i++)
+    {
+        ss << std::setw(2) << static_cast<unsigned>(deviceAddress[i]);
+    }
+    return ss.str();
+}
+
 void TemperatureSensorHandler::init()
 {
     _sensors->begin();
     int numberOfDevices = _sensors->getDeviceCount();
 
-    std::vector<TemperatureEntity *> sensors_entities;
-
     for (int i = 0; i < numberOfDevices; i++)
     {
+        // get device address an output via gui
+        DeviceAddress deviceAddress;
+        _sensors->getAddress(deviceAddress, i);
+        std::string address = addressToString(deviceAddress);
+
         // create senor entity
         // This function should later assign the IDs correctly from EEPROM data
-        TemperatureEntity *tempSensor = new TemperatureEntity("temperature", i, this);
-        sensors_entities.push_back(tempSensor);
+        sensors_entities.push_back(new TemperatureEntity("temp" + std::to_string(i + 1), i, this));
+
+        app.getGui().addMessage({"Temperature" + std::to_string(i) + ": ", MessageType::INFO, address, 2000});
+        Serial.print("\nTemperature Sensor Address:");
+        Serial.println(address.c_str());
     }
 }
 

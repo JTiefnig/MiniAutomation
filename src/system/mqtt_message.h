@@ -1,13 +1,19 @@
 #ifndef MQTT_MESSAGE_H
 #define MQTT_MESSAGE_H
 #include <string>
+#include "pubsubclient.h"
 
-struct MQMessage
+struct MQMessageBase
 {
     std::string topic;
-    std::string message;
 
-    // todo: an itertor hat iterates over te topic
+    // todo: an itertor hat iterates over the topic
+
+    MQMessageBase(const std::string topic) : topic(topic)
+    {
+    }
+
+    virtual void publish(PubSubClient &client) = 0;
 
     std::vector<std::string> splitTopic() const
     {
@@ -21,6 +27,40 @@ struct MQMessage
         }
         result.push_back(topic.substr(start));
         return result;
+    }
+};
+
+struct MQMessage : MQMessageBase
+{
+    std::string payload;
+
+    MQMessage(const std::string topic, const std::string payload) : MQMessageBase(topic), payload(payload)
+    {
+    }
+
+    virtual void publish(PubSubClient &client)
+    {
+        client.publish(topic.c_str(), payload.c_str());
+    }
+};
+
+struct ByteMQMessage : MQMessageBase
+{
+    uint8_t *payload;
+    size_t length;
+
+    ByteMQMessage(const std::string topic, uint8_t *payload, size_t length)
+        : MQMessageBase(topic)
+    {
+        // clone payload in heap
+        this->payload = new uint8_t[length];
+        memcpy(this->payload, payload, length);
+        this->length = length;
+    }
+
+    virtual void publish(PubSubClient &client)
+    {
+        client.publish(topic.c_str(), payload, length);
     }
 };
 

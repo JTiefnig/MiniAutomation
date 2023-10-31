@@ -71,7 +71,7 @@ public:
     void publishState(MQTTClient &client) override
     {
         std::string stateTopic = client.getDeviceId() + "/" + topic() + "/state";
-        client.publish(stateTopic.c_str(), stateNames[state]);
+        client.publish(new MQMessage(stateTopic, stateNames[state]));
     }
 
     bool processMessage(const MQMessage &msg) override
@@ -82,11 +82,11 @@ public:
 
         if (tokens[1] == topic() && tokens[2] == "set")
         {
-            if (msg.message == stateNames[ON])
+            if (msg.payload == stateNames[ON])
             {
                 set(ON);
             }
-            else if (msg.message == stateNames[OFF])
+            else if (msg.payload == stateNames[OFF])
             {
                 set(OFF);
             }

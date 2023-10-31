@@ -66,6 +66,9 @@ void Application::init()
 
     // init mqtt client
     mqttClient.init(credentials);
+
+    // init temperature sensor
+    temperatureSensorHandler.init();
 }
 
 void Application::controlTasksLoop(void *parameters)

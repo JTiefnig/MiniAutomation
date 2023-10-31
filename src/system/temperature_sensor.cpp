@@ -28,6 +28,26 @@ float TemperatureEntity::get() const
 
 void TemperatureEntity::publish(MQTTClient &client) const
 {
-    int idvalue = this->id;
-    client.publish(("esp32/temperature/" + std::to_string(idvalue)).c_str(), std::to_string(this->get()).c_str());
+    float temperature = get();
+
+    // client.publish(mqtt_topic, (const uint8_t *)&temperature, sizeof(temperature));
+
+    client.publish(new ByteMQMessage(this->name, (byte *)&temperature, sizeof(temperature)));
+}
+
+std::string TemperatureEntity::topic()
+{
+    return this->name;
+}
+
+bool TemperatureEntity::processMessage(const MQMessage &msg)
+{
+    return false;
+}
+
+void TemperatureEntity::publishState(MQTTClient &client)
+{
+    std::string stateTopic = client.getDeviceId() + "/" + topic() + "/state";
+    float temperatureReading = get();
+    client.publish(new ByteMQMessage(stateTopic, (byte *)&temperatureReading, sizeof(temperatureReading)));
 }

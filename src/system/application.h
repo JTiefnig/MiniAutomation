@@ -5,6 +5,7 @@
 #include "control_task_scheduler.h"
 #include "mini_gui.h"
 #include "mqtt_client.h"
+#include "temperature_sensor_handler.h"
 #include <Preferences.h>
 
 class Application
@@ -13,6 +14,7 @@ private:
     MiniGUI gui;
     ControlTaskScheduler contorlSystem;
     MQTTClient mqttClient;
+    TemperatureSensorHandler temperatureSensorHandler;
 
 public:
     Application();
