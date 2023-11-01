@@ -78,7 +78,6 @@ void MQTTClient::loop()
 {
     if (getStatus() != CONNECTION_STATUS::CONNECTED)
         reconnect();
-
     //
     MQMessageBase *currentMessage;
     while (xQueueReceive(sendQueue, &currentMessage, 0) == pdTRUE)
@@ -93,11 +92,6 @@ void MQTTClient::loop()
 
 void MQTTClient::receiveCallback(char *topic, byte *message, unsigned int length)
 {
-    // write to serial
-    Serial.print("Message arrived on topic: ");
-    Serial.print(topic);
-    Serial.print(". Message: ");
-
     std::string messageTemp;
 
     for (int i = 0; i < length; i++)
@@ -108,8 +102,7 @@ void MQTTClient::receiveCallback(char *topic, byte *message, unsigned int length
 
     MQMessage msg = {topic, messageTemp};
 
-    app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
-
+    //app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
     // todo: improve message rooting by custom mqtt topic callback manager
     for (auto &component : this->components)
     {

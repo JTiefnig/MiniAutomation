@@ -1,4 +1,3 @@
-
 #ifndef TEMPERATURE_SENSOR_H
 #define TEMPERATURE_SENSOR_H
 
@@ -26,7 +25,7 @@ public:
 
     ~TemperatureEntity();
 
-    virtual std::string topic();
+    virtual std::string topic() const;
 
     virtual bool processMessage(const MQMessage &msg) override;
 

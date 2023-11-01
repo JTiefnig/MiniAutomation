@@ -32,7 +32,7 @@ void Application::init()
     // this shall be generalized to entities in the future
 
     Preferences preferences;
-    preferences.begin("mplc", false);
+    preferences.begin("mplc", true);
     MQTTClient::ConnectionCredentials credentials = {
         preferences.getString("client_id", CLIENT_ID).c_str(),
         preferences.getString("wifi_ssid", WIFI_SSID).c_str(),
@@ -50,7 +50,7 @@ void Application::init()
     // startup tasks
     xTaskCreatePinnedToCore(controlTasksLoop,
                             "SystemLoop",
-                            2048,
+                            16000,
                             &contorlSystem,
                             1,
                             NULL,
@@ -58,7 +58,7 @@ void Application::init()
 
     xTaskCreatePinnedToCore(miniGuiLoop,
                             "GuiLoop",
-                            2048,
+                            8000,
                             &gui,
                             1,
                             NULL,

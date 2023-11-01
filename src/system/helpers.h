@@ -7,6 +7,7 @@
 #include <functional>
 #include <sstream>
 #include <iterator>
+#include <iomanip>
 
 template <typename... X>
 class CallbackManager;
@@ -30,5 +31,13 @@ public:
 protected:
     std::vector<std::function<void(Ts...)>> callbacks_;
 };
+
+template <typename T>
+std::string convertToString(const T &value, int precision = 2)
+{
+    std::stringstream ss;
+    ss << std::fixed << std::setprecision(precision) << value;
+    return ss.str();
+}
 
 #endif

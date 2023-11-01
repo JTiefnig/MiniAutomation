@@ -4,6 +4,7 @@
 #include "application.h"
 #include <iomanip>
 #include <sstream>
+#include <Preferences.h>
 
 extern Application app;
 
@@ -29,6 +30,10 @@ void TemperatureSensorHandler::init()
     _sensors->begin();
     int numberOfDevices = _sensors->getDeviceCount();
 
+    Serial.println("\n## Initializing Temperature Sensors ##");
+
+    Preferences preferences;
+    preferences.begin("tempSensors", false);
     for (int i = 0; i < numberOfDevices; i++)
     {
         // get device address an output via gui
@@ -36,14 +41,21 @@ void TemperatureSensorHandler::init()
         _sensors->getAddress(deviceAddress, i);
         std::string address = addressToString(deviceAddress);
 
+        std::string name = preferences.getString("client_id").c_str();
+
+        if (name == "")
+        {
+            name = "temp" + std::to_string(i + 1);
+        }
+
         // create senor entity
         // This function should later assign the IDs correctly from EEPROM data
-        sensors_entities.push_back(new TemperatureEntity("temp" + std::to_string(i + 1), i, this));
+        sensors_entities.push_back(new TemperatureEntity(name, i, this));
 
-        app.getGui().addMessage({"Temperature" + std::to_string(i) + ": ", MessageType::INFO, address, 2000});
-        Serial.print("\nTemperature Sensor Address:");
+        Serial.printf("\nTempSensor %i: ", i);
         Serial.println(address.c_str());
     }
+    preferences.end();
 }
 
 float TemperatureSensorHandler::getTempCByIndex(uint8_t id) const
@@ -58,4 +70,12 @@ TemperatureSensorHandler::~TemperatureSensorHandler()
     delete _wire;
     delete _sensors;
     // delete all entities
+}
+
+void TemperatureSensorHandler::publish(MQTTClient &client) const
+{
+    for (auto &sensor : sensors_entities)
+    {
+        sensor->publish(client);
+    }
 }

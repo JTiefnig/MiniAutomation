@@ -1,4 +1,5 @@
 #include "temperature_sensor.h"
+#include "helpers.h"
 
 void TemperatureEntity::process(const std::string message)
 {
@@ -28,14 +29,18 @@ float TemperatureEntity::get() const
 
 void TemperatureEntity::publish(MQTTClient &client) const
 {
-    float temperature = get();
+    std::string stateTopic = client.getDeviceId() + "/" + this->topic();
+    float temperatureReading = get();
 
-    // client.publish(mqtt_topic, (const uint8_t *)&temperature, sizeof(temperature));
+    // std::ostringstream ss;
+    // ss << temperatureReading;
 
-    client.publish(new ByteMQMessage(this->name, (byte *)&temperature, sizeof(temperature)));
+    std::string temperatureReadingStr = std::to_string(temperatureReading);
+
+    client.publish(new MQMessage(stateTopic, temperatureReadingStr));
 }
 
-std::string TemperatureEntity::topic()
+std::string TemperatureEntity::topic() const
 {
     return this->name;
 }
@@ -47,7 +52,5 @@ bool TemperatureEntity::processMessage(const MQMessage &msg)
 
 void TemperatureEntity::publishState(MQTTClient &client)
 {
-    std::string stateTopic = client.getDeviceId() + "/" + topic() + "/state";
-    float temperatureReading = get();
-    client.publish(new ByteMQMessage(stateTopic, (byte *)&temperatureReading, sizeof(temperatureReading)));
+    this->publish(client);
 }

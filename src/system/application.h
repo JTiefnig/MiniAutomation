@@ -28,6 +28,10 @@ public:
     // get gui
     MiniGUI &getGui();
 
+    TemperatureSensorHandler &getTemperatureSensorHandler(){
+        return this->temperatureSensorHandler;
+    }
+
     void init();
 
 private:

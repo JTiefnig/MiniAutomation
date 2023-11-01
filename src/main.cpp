@@ -21,7 +21,7 @@
 
 #define VERSION "0.0.1"
 
-// handles Startup
+// central application object
 extern Application app;
 
 void setup()
@@ -33,23 +33,25 @@ void setup()
 
     app.init();
 
-    app.getControlSystem().addTask(new ControlTask([]()
-                                                   { app.getGui().addMessage({"Test", MessageType::INFO, "Testing", 2000}); },
-                                                   1000));
+    for (int i = 0; i < 8; i++)
+    {
+        new OutEntity(std::to_string(i + 1), i);
+    }
 
+    app.getControlSystem().addTask(
+        new ControlTask(
+            []()
+            { app.getTemperatureSensorHandler().publish(app.getMqttClient()); },
+            1000));
+
+    // just a delay to ensrue full initalisation of threads
+    vTaskDelay(500 / portTICK_PERIOD_MS);
 }
 
 void loop()
 {
-
     app.getMqttClient().loop();
-
-    // startup.getGui().addMessage({"Test", MessageType::INFO, "Testing", 2000});
-    // // serial receive to string
-    // std::string input = Serial.readStringUntil('\n').c_str();
-    // startup.getGui().addMessage({"input", MessageType::INFO, input, 10000});
 
     // MQTT client
     // ArduinoOTA.handle();
-    // vTaskDelay(1000);
 }

@@ -29,6 +29,15 @@ public:
     ~TemperatureSensorHandler();
 
     std::string addressToString(DeviceAddress deviceAddress);
+
+    void publish(MQTTClient &client) const;
+
+    void setSensorName(uint8_t id, std::string name);
+
+    std::vector<TemperatureEntity *> &getSensorsEntities()
+    {
+        return this->sensors_entities;
+    }
 };
 
 #endif

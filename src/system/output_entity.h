@@ -95,7 +95,7 @@ public:
         return false;
     }
 
-    std::string topic() override
+    std::string topic() const override
     {
         return this->getName();
     }

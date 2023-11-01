@@ -73,7 +73,6 @@ public:
   void init(const ConnectionCredentials &credentials)
   {
     this->credentials = credentials;
-    reconnect();
   }
 
   void addComponent(MqttComponent *component)
