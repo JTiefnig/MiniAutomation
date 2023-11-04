@@ -6,7 +6,6 @@
 struct MQMessageBase
 {
     std::string topic;
-
     // todo: an itertor hat iterates over the topic
 
     MQMessageBase(const std::string topic) : topic(topic)
@@ -44,24 +43,6 @@ struct MQMessage : MQMessageBase
     }
 };
 
-struct ByteMQMessage : MQMessageBase
-{
-    uint8_t *payload;
-    size_t length;
-
-    ByteMQMessage(const std::string topic, uint8_t *payload, size_t length)
-        : MQMessageBase(topic)
-    {
-        // clone payload in heap
-        this->payload = new uint8_t[length];
-        memcpy(this->payload, payload, length);
-        this->length = length;
-    }
-
-    virtual void publish(PubSubClient &client)
-    {
-        client.publish(topic.c_str(), payload, length);
-    }
-};
+// TBD messages with other types of payloads
 
 #endif //

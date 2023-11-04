@@ -15,9 +15,10 @@
 #include "system/mqtt_client.h"
 #include "system/mini_gui.h"
 #include "system/temperature_sensor.h"
-#include "system/output_entity.h"
+#include "system/binary_output.h"
 #include "system/control_task_scheduler.h"
 #include "system/application.h"
+#include "system/generic_Entity.h"
 
 #define VERSION "0.0.1"
 
@@ -35,14 +36,24 @@ void setup()
 
     for (int i = 0; i < 8; i++)
     {
-        new OutEntity(std::to_string(i + 1), i);
+        // new OutEntity(std::to_string(i + 1), i);
     }
 
     app.getControlSystem().addTask(
         new ControlTask(
-            []()
-            { app.getTemperatureSensorHandler().publish(app.getMqttClient()); },
+            []() {},
             1000));
+
+    GenericEntity<int> ent("myent", 3, &app.getMqttClient());
+
+    ent.set(5);
+    ent = 6;
+    int i = ent;
+    Serial.println(i);
+
+    // Entity ent = app.entityHander.createEntity("mysom", 3);
+    // ent.set("ON");
+    // ent.addcallback([](std::string msg) { Serial.println(msg.c_str()); });
 
     // just a delay to ensrue full initalisation of threads
     vTaskDelay(500 / portTICK_PERIOD_MS);

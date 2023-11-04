@@ -102,8 +102,8 @@ void MQTTClient::receiveCallback(char *topic, byte *message, unsigned int length
 
     MQMessage msg = {topic, messageTemp};
 
-    //app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
-    // todo: improve message rooting by custom mqtt topic callback manager
+    // app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
+    //  todo: improve message rooting by custom mqtt topic callback manager
     for (auto &component : this->components)
     {
         component->processMessage(msg);

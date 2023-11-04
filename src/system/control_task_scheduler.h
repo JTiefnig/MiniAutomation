@@ -74,11 +74,8 @@ public:
         }
     }
 
-    // members
-
     void loop()
     {
-
         for (auto task : this->tasks)
         {
             if (cycleTime % task->getExecutionInterval() == 0)

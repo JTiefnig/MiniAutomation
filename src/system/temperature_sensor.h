@@ -21,20 +21,16 @@ private:
 public:
     virtual void process(const std::string message);
 
-    TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors);
-
+    TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MQTTClient *client);
     ~TemperatureEntity();
 
     virtual std::string topic() const;
 
     virtual bool processMessage(const MQMessage &msg) override;
 
-    virtual void publishState(MQTTClient &client);
-
-    std::string addressToString(DeviceAddress deviceAddress);
+    virtual void publishState() const override;
 
     float get() const;
-    void publish(MQTTClient &client) const;
 };
 
 #endif

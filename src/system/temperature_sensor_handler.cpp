@@ -50,7 +50,7 @@ void TemperatureSensorHandler::init()
 
         // create senor entity
         // This function should later assign the IDs correctly from EEPROM data
-        sensors_entities.push_back(new TemperatureEntity(name, i, this));
+        sensors_entities.push_back(new TemperatureEntity(name, i, this, &app.getMqttClient()));
 
         Serial.printf("\nTempSensor %i: ", i);
         Serial.println(address.c_str());
@@ -72,10 +72,10 @@ TemperatureSensorHandler::~TemperatureSensorHandler()
     // delete all entities
 }
 
-void TemperatureSensorHandler::publish(MQTTClient &client) const
+void TemperatureSensorHandler::publishState(MQTTClient &client) const
 {
     for (auto &sensor : sensors_entities)
     {
-        sensor->publish(client);
+        sensor->publishState();
     }
 }

@@ -9,15 +9,18 @@ class MQTTClient;
 
 class MqttComponent
 {
+protected:
+    MQTTClient *client;
+
 public:
     virtual std::string topic() const = 0;
 
     virtual bool processMessage(const MQMessage &msg) = 0;
 
-    virtual void publishState(MQTTClient &client) = 0;
+    virtual void publishState() const = 0;
 
-    MqttComponent() {}
-    ~MqttComponent() {}
+    MqttComponent(MQTTClient *client);
+    ~MqttComponent();
 };
 
 #endif // MQTT_COMPONENT_H

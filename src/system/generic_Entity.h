@@ -1,0 +1,96 @@
+#ifndef GENERIC_ENTITY_H
+#define GENERIC_ENTITY_H
+#include <iostream>
+#include <sstream>
+#include <string>
+#include "mqtt_client.h"
+#include "mqtt_message.h"
+#include "mqtt_component.h"
+#include "entity.h"
+
+template <typename T>
+class GenericEntity : public EntityBase, public MqttComponent
+{
+public:
+    GenericEntity(const std::string name, const T &value, MQTTClient *client)
+        : EntityBase(name), value(value), MqttComponent(client)
+    {
+    }
+
+    T get() const
+    {
+        return value;
+    }
+
+    void set(const T &newValue)
+    {
+        value = newValue;
+    }
+
+    void publishState() const override
+    {
+        std::string stateTopic = client->getDeviceId() + "/" + this->topic();
+        client->publish(new MQMessage(stateTopic, toPayload()));
+    }
+
+    std::string topic() const override
+    {
+        return this->name;
+    }
+
+    bool processMessage(const MQMessage &msg) override
+    {
+        std::vector<std::string> tokens = msg.splitTopic();
+        if (tokens.size() != 3)
+            return false;
+
+        if (tokens[1] == topic() && tokens[2] == "set")
+        {
+            fromPayload(msg.payload);
+            return true;
+        }
+        return false;
+    }
+
+    operator T() const
+    {
+        return value;
+    }
+
+    GenericEntity<T> &operator=(const T &newValue)
+    {
+        this->set(newValue);
+        return *this;
+    }
+
+    GenericEntity<T> &operator=(const GenericEntity<T> &other)
+    {
+        this->set(other.get());
+        return *this;
+    }
+
+    bool operator==(const T &other) const
+    {
+        return this->get() == other;
+    }
+
+private:
+    std::string toPayload() const
+    {
+        // Transform the value to a string payload
+        std::ostringstream oss;
+        oss << value;
+        return oss.str();
+    }
+    void fromPayload(const std::string &payload)
+    {
+        // Transform the payload to the value
+        std::istringstream iss(payload);
+        iss >> value;
+    }
+
+    std::string name;
+    T value;
+};
+
+#endif // GENERIC_ENTITY_H

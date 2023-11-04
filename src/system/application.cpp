@@ -30,7 +30,6 @@ void Application::init()
 
     // load preferences
     // this shall be generalized to entities in the future
-
     Preferences preferences;
     preferences.begin("mplc", true);
     MQTTClient::ConnectionCredentials credentials = {

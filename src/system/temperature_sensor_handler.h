@@ -13,8 +13,6 @@ class TemperatureEntity;
 class TemperatureSensorHandler
 {
 private:
-    int id;
-    // std::vector<TemperatureEntity *> sensors_entities;
     OneWire *_wire;
     DallasTemperature *_sensors;
     std::vector<TemperatureEntity *> sensors_entities;
@@ -30,7 +28,7 @@ public:
 
     std::string addressToString(DeviceAddress deviceAddress);
 
-    void publish(MQTTClient &client) const;
+    void publishState(MQTTClient &client) const;
 
     void setSensorName(uint8_t id, std::string name);
 
@@ -38,6 +36,9 @@ public:
     {
         return this->sensors_entities;
     }
+
+    //copy construtor
+    
 };
 
 #endif
