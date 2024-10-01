@@ -46,7 +46,7 @@ void MQTTClient::reconnect()
         delay(500);
         Serial.print(".");
         // to gui
-        app.getGui().addMessage({"WiFi", MessageType::INFO, "Connecting to WiFi", 1000});
+        app.getGui().addMessage({"WiFi", MessageType::INFO, "Connecting to WiFi\n" + credentials.ssid, 1000});
     }
 
     Serial.println("");
@@ -70,6 +70,7 @@ void MQTTClient::reconnect()
         delay(500);
         Serial.print(".");
     }
+    Serial.println("MQTT connected");
 
     client.subscribe((credentials.deviceId + "/#").c_str());
 }
@@ -102,7 +103,7 @@ void MQTTClient::receiveCallback(char *topic, byte *message, unsigned int length
 
     MQMessage msg = {topic, messageTemp};
 
-    // app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
+    app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
     //  todo: improve message rooting by custom mqtt topic callback manager
     for (auto &component : this->components)
     {

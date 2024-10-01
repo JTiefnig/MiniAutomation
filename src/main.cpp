@@ -34,11 +34,7 @@ void setup()
 
     app.init();
 
-    for (int i = 0; i < 8; i++)
-    {
-        // new OutEntity(std::to_string(i + 1), i);
-    }
-
+    // example of simple control task
     app.getControlSystem().addTask(
         new ControlTask(
             []() {},

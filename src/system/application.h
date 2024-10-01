@@ -7,6 +7,7 @@
 #include "mqtt_client.h"
 #include "temperature_sensor_handler.h"
 #include "binary_output_hander.h"
+#include "entity_handler.h"
 #include <Preferences.h>
 
 class Application
@@ -15,8 +16,11 @@ private:
     MiniGUI gui;
     ControlTaskScheduler contorlSystem;
     MQTTClient mqttClient;
+
     TemperatureSensorHandler temperatureSensorHandler;
     BinaryOutputHandler binaryOutputEntityHandler;
+
+    EntityHandler entityHander;
 
 public:
     Application();

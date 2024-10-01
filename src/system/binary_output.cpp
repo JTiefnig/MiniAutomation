@@ -9,16 +9,18 @@ OutEntity::~OutEntity()
 {
 }
 
-void OutEntity::set(State state)
+void OutEntity::set(State setState)
 {
-    if (state == this->state)
+    if (setState == this->state)
         return;
 
-    if (state == ON)
+    this->state = setState;
+
+    if (setState == ON)
     {
         sr->set(pin, HIGH);
     }
-    else if (state == OFF)
+    else if (setState == OFF)
     {
         sr->set(pin, LOW);
     }
@@ -36,6 +38,7 @@ void OutEntity::publishState() const
 bool OutEntity::processMessage(const MQMessage &msg)
 {
     std::vector<std::string> tokens = msg.splitTopic();
+
     if (tokens.size() != 3)
         return false;
 
