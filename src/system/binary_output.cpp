@@ -1,7 +1,7 @@
 #include "binary_output.h"
-#include "binary_output_hander.h"
+#include "binary_output_handler.h"
 
-OutEntity::OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MQTTClient *client)
+OutEntity::OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttClient *client)
     : EntityBase(name), pin(pin), sr(sr), MqttComponent(client), state(OFF)
 {
 }
@@ -25,24 +25,18 @@ void OutEntity::set(State setState)
         sr->set(pin, LOW);
     }
 
-    this->callbacks.call();
+    callCallbacks();
     publishState();
 }
 
-void OutEntity::publishState() const
-{
-    std::string stateTopic = client->getDeviceId() + "/" + topic() + "/state";
-    client->publish(new MQMessage(stateTopic, stateNames[state]));
-}
-
-bool OutEntity::processMessage(const MQMessage &msg)
+bool OutEntity::processMessage(const MqttMsg &msg)
 {
     std::vector<std::string> tokens = msg.splitTopic();
 
     if (tokens.size() != 3)
         return false;
 
-    if (tokens[1] == topic() && tokens[2] == "set")
+    if (tokens[1] == this->name && tokens[2] == "set")
     {
         if (msg.payload == stateNames[ON])
         {
@@ -57,14 +51,15 @@ bool OutEntity::processMessage(const MQMessage &msg)
     return false;
 }
 
-std::string OutEntity::topic() const
-{
-    return this->getName();
-}
-
 OutEntity::State OutEntity::get() const
 {
     return state;
+}
+
+MqttMsg OutEntity::toMessage() const
+{
+    std::string stateTopic = client->getDeviceId() + "/" + this->name + "/state";
+    return MqttMsg(stateTopic, stateNames[state]);
 }
 
 const char *OutEntity::stateNames[] = {"ON", "OFF"};

@@ -6,13 +6,13 @@
 #include "mqtt_client.h"
 #include "mqtt_message.h"
 #include "mqtt_component.h"
-#include "entity.h"
+#include "entity_base.h"
 
 template <typename T>
 class GenericEntity : public EntityBase, public MqttComponent
 {
 public:
-    GenericEntity(const std::string name, const T &value, MQTTClient *client)
+    GenericEntity(const std::string name, const T &value, MqttClient *client)
         : EntityBase(name), value(value), MqttComponent(client)
     {
     }
@@ -24,27 +24,19 @@ public:
 
     void set(const T &newValue)
     {
+        if (value == newValue)
+            return;
         value = newValue;
+        callCallbacks();
     }
 
-    void publishState() const override
-    {
-        std::string stateTopic = client->getDeviceId() + "/" + this->topic();
-        client->publish(new MQMessage(stateTopic, toPayload()));
-    }
-
-    std::string topic() const override
-    {
-        return this->name;
-    }
-
-    bool processMessage(const MQMessage &msg) override
+    bool processMessage(const MqttMsg &msg) override
     {
         std::vector<std::string> tokens = msg.splitTopic();
         if (tokens.size() != 3)
             return false;
 
-        if (tokens[1] == topic() && tokens[2] == "set")
+        if (tokens[1] == this->name && tokens[2] == "set")
         {
             fromPayload(msg.payload);
             return true;
@@ -72,6 +64,12 @@ public:
     bool operator==(const T &other) const
     {
         return this->get() == other;
+    }
+
+    virtual MqttMsg toMessage() const override
+    {
+        std::string stateTopic = client->getDeviceId() + "/" + this->name;
+        return MqttMsg(stateTopic, toPayload());
     }
 
 private:

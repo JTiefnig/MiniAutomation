@@ -3,12 +3,12 @@
 #include <string>
 #include "pubsubclient.h"
 
-struct MQMessageBase
+struct MqttMsgBase
 {
     std::string topic;
     // todo: an itertor hat iterates over the topic
 
-    MQMessageBase(const std::string topic) : topic(topic)
+    MqttMsgBase(const std::string topic) : topic(topic)
     {
     }
 
@@ -29,11 +29,11 @@ struct MQMessageBase
     }
 };
 
-struct MQMessage : MQMessageBase
+struct MqttMsg : MqttMsgBase
 {
     std::string payload;
 
-    MQMessage(const std::string topic, const std::string payload) : MQMessageBase(topic), payload(payload)
+    MqttMsg(const std::string topic, const std::string payload) : MqttMsgBase(topic), payload(payload)
     {
     }
 

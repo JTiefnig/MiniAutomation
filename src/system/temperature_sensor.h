@@ -6,7 +6,7 @@
 #include <string>
 #include <sstream>
 #include "mqtt_client.h"
-#include "entity.h"
+#include "entity_base.h"
 #include "temperature_sensor_handler.h"
 #include "mqtt_component.h"
 
@@ -21,14 +21,12 @@ private:
 public:
     virtual void process(const std::string message);
 
-    TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MQTTClient *client);
+    TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MqttClient *client);
     ~TemperatureEntity();
 
-    virtual std::string topic() const;
+    virtual bool processMessage(const MqttMsg &msg) override;
 
-    virtual bool processMessage(const MQMessage &msg) override;
-
-    virtual void publishState() const override;
+    virtual MqttMsg toMessage() const override;
 
     float get() const;
 };

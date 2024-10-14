@@ -2,7 +2,7 @@
 #define EntityHandler_h
 
 #include <map>
-#include "entity.h"
+#include "entity_base.h"
 
 class EntityHandler
 {

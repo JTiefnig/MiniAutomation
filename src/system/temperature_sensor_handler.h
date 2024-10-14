@@ -28,8 +28,6 @@ public:
 
     std::string addressToString(DeviceAddress deviceAddress);
 
-    void publishState(MQTTClient &client) const;
-
     void setSensorName(uint8_t id, std::string name);
 
     std::vector<TemperatureEntity *> &getSensorsEntities()
@@ -37,8 +35,7 @@ public:
         return this->sensors_entities;
     }
 
-    //copy construtor
-    
+    // copy construtor
 };
 
 #endif

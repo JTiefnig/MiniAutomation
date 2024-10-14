@@ -30,6 +30,8 @@ void TemperatureSensorHandler::init()
     _sensors->begin();
     int numberOfDevices = _sensors->getDeviceCount();
 
+    Application &app = Application::getInstance();
+
     Serial.println("\n## Initializing Temperature Sensors ##");
 
     Preferences preferences;
@@ -70,12 +72,4 @@ TemperatureSensorHandler::~TemperatureSensorHandler()
     delete _wire;
     delete _sensors;
     // delete all entities
-}
-
-void TemperatureSensorHandler::publishState(MQTTClient &client) const
-{
-    for (auto &sensor : sensors_entities)
-    {
-        sensor->publishState();
-    }
 }

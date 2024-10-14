@@ -10,7 +10,7 @@ Application::~Application()
 }
 
 // get mqtt client
-MQTTClient &Application::getMqttClient()
+MqttClient &Application::getMqttClient()
 {
     return this->mqttClient;
 }
@@ -32,7 +32,7 @@ void Application::init()
     // this shall be generalized to entities in the future
     Preferences preferences;
     preferences.begin("mplc", true);
-    MQTTClient::ConnectionCredentials credentials = {
+    MqttClient::ConnectionCredentials credentials = {
         preferences.getString("client_id", CLIENT_ID).c_str(),
         preferences.getString("wifi_ssid", WIFI_SSID).c_str(),
         preferences.getString("wifi_password", WIFI_PASSWORD).c_str(),
@@ -88,4 +88,13 @@ void Application::miniGuiLoop(void *parameters)
     }
 }
 
-Application app;
+Application *Application::instance = nullptr;
+
+Application &Application::getInstance()
+{
+    if (instance == nullptr)
+    {
+        instance = new Application();
+    }
+    return *instance;
+}

@@ -7,36 +7,36 @@
 
 extern Application app;
 
-MQTTClient::CONNECTION_STATUS MQTTClient::getStatus()
+MqttClient::CONNECTION_STATUS MqttClient::getStatus()
 {
     if (WiFi.status() != WL_CONNECTED)
-        return MQTTClient::CONNECTION_STATUS::WIFI_DISCONNECTED;
+        return MqttClient::CONNECTION_STATUS::WIFI_DISCONNECTED;
     else if (!this->client.connected())
-        return MQTTClient::CONNECTION_STATUS::MQTT_CLIENT_DISCONNECTED;
+        return MqttClient::CONNECTION_STATUS::MQTT_CLIENT_DISCONNECTED;
 
-    return MQTTClient::CONNECTION_STATUS::CONNECTED;
+    return MqttClient::CONNECTION_STATUS::CONNECTED;
 }
 
-MQTTClient::MQTTClient() : wifiClient(), client(wifiClient), credentials()
+MqttClient::MqttClient() : wifiClient(), client(wifiClient), credentials()
 {
-    sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessageBase *));
+    sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsgBase *));
 }
 
-MQTTClient::MQTTClient(const ConnectionCredentials &credentials) : wifiClient(), client(wifiClient), credentials(credentials)
+MqttClient::MqttClient(const ConnectionCredentials &credentials) : wifiClient(), client(wifiClient), credentials(credentials)
 {
-    sendQueue = xQueueCreate(send_queue_len, sizeof(MQMessageBase *));
+    sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsgBase *));
 }
 
-MQTTClient::~MQTTClient()
+MqttClient::~MqttClient()
 {
 }
 
-void MQTTClient::publish(MQMessageBase *msg)
+void MqttClient::publish(const MqttMsgBase &msg)
 {
     xQueueSend(sendQueue, &msg, 0);
 }
 
-void MQTTClient::reconnect()
+void MqttClient::reconnect()
 {
     Serial.print(("Connect Wifi:" + credentials.ssid + " " + credentials.password).c_str());
     WiFi.mode(WIFI_STA);
@@ -46,12 +46,10 @@ void MQTTClient::reconnect()
         delay(500);
         Serial.print(".");
         // to gui
-        app.getGui().addMessage({"WiFi", MessageType::INFO, "Connecting to WiFi\n" + credentials.ssid, 1000});
+        Application::getInstance().getGui().addMessage({"WiFi", MessageType::INFO, "Connecting to WiFi\n" + credentials.ssid, 1000});
     }
 
-    Serial.println("");
-    Serial.println("WiFi connected");
-    Serial.println("IP address: ");
+    Serial.println("\nWiFi connected");
     Serial.println(WiFi.localIP());
 
     vTaskDelay(1000 / portTICK_PERIOD_MS);
@@ -75,12 +73,12 @@ void MQTTClient::reconnect()
     client.subscribe((credentials.deviceId + "/#").c_str());
 }
 
-void MQTTClient::loop()
+void MqttClient::loop()
 {
     if (getStatus() != CONNECTION_STATUS::CONNECTED)
         reconnect();
     //
-    MQMessageBase *currentMessage;
+    MqttMsgBase *currentMessage;
     while (xQueueReceive(sendQueue, &currentMessage, 0) == pdTRUE)
     {
         currentMessage->publish(client);
@@ -91,7 +89,7 @@ void MQTTClient::loop()
     client.loop();
 }
 
-void MQTTClient::receiveCallback(char *topic, byte *message, unsigned int length)
+void MqttClient::receiveCallback(char *topic, byte *message, unsigned int length)
 {
     std::string messageTemp;
 
@@ -101,9 +99,9 @@ void MQTTClient::receiveCallback(char *topic, byte *message, unsigned int length
         messageTemp += (char)message[i];
     }
 
-    MQMessage msg = {topic, messageTemp};
+    MqttMsg msg = {topic, messageTemp};
 
-    app.getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
+    Application::getInstance().getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
     //  todo: improve message rooting by custom mqtt topic callback manager
     for (auto &component : this->components)
     {

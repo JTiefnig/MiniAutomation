@@ -2,7 +2,7 @@
 #define BINARY_OUTPUT_H
 
 #include <Arduino.h>
-#include "entity.h"
+#include "entity_base.h"
 #include "config.h"
 #include "mqtt_component.h"
 #include <string>
@@ -29,16 +29,14 @@ private:
     BinaryOutputHandler *sr;
 
 public:
-    OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MQTTClient *client);
+    OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttClient *client);
     ~OutEntity();
 
     void set(State state);
 
-    void publishState() const override;
+    bool processMessage(const MqttMsg &msg) override;
 
-    bool processMessage(const MQMessage &msg) override;
-
-    std::string topic() const override;
+    virtual MqttMsg toMessage() const override;
 
     State get() const;
 };

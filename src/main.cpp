@@ -23,14 +23,16 @@
 #define VERSION "0.0.1"
 
 // central application object
-extern Application app;
 
 void setup()
 {
     Serial.begin(115200);
     Serial.println("MPLC Booting");
     Serial.println(VERSION);
+
     pinMode(LED_BUILTIN, OUTPUT); // debug Status initailisation
+
+    Application &app = Application::getInstance();
 
     app.init();
 
@@ -57,8 +59,8 @@ void setup()
 
 void loop()
 {
-    app.getMqttClient().loop();
+    Application::getInstance().getMqttClient().loop();
 
-    // MQTT client
+    // Over the air update
     // ArduinoOTA.handle();
 }

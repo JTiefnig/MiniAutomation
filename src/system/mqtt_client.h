@@ -15,7 +15,7 @@
 
 class MqttComponent;
 
-class MQTTClient
+class MqttClient
 {
 public:
   struct ConnectionCredentials
@@ -48,13 +48,13 @@ public:
 
   CONNECTION_STATUS getStatus();
 
-  MQTTClient();
+  MqttClient();
 
-  MQTTClient(const ConnectionCredentials &credentials);
+  MqttClient(const ConnectionCredentials &credentials);
 
   // constructor with std::string parameters
 
-  ~MQTTClient();
+  ~MqttClient();
 
   std::string getDeviceId() const
   {
@@ -62,7 +62,7 @@ public:
   }
 
   // append the message to the queue // todo - use std::string
-  void publish(MQMessageBase *msg);
+  void publish(const MqttMsgBase &msg);
 
   void reconnect();
 

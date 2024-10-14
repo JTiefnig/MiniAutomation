@@ -5,21 +5,21 @@
 #include "mqtt_client.h"
 #include "mqtt_message.h"
 
-class MQTTClient;
+class MqttClient;
 
 class MqttComponent
 {
 protected:
-    MQTTClient *client;
+    MqttClient *client;
 
 public:
-    virtual std::string topic() const = 0;
+    virtual bool processMessage(const MqttMsg &msg) = 0;
 
-    virtual bool processMessage(const MQMessage &msg) = 0;
+    virtual MqttMsg toMessage() const = 0;
 
-    virtual void publishState() const = 0;
+    virtual void publishState() const;
 
-    MqttComponent(MQTTClient *client);
+    MqttComponent(MqttClient *client);
     ~MqttComponent();
 };
 
