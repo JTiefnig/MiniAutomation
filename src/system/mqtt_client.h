@@ -62,7 +62,7 @@ public:
   }
 
   // append the message to the queue // todo - use std::string
-  void publish(const MqttMsgBase &msg);
+  void publish(const MqttMsg &msg);
 
   void reconnect();
 

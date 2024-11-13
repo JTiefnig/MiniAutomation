@@ -18,7 +18,6 @@ private:
     MqttClient mqttClient;
 
     TemperatureSensorHandler temperatureSensorHandler;
-    BinaryOutputHandler binaryOutputEntityHandler;
 
     EntityHandler entityHander;
     Application();
@@ -27,7 +26,7 @@ private:
     static Application *instance;
 
 public:
-    static Application &getInstance();
+    static Application &inst();
 
     // get mqtt client
     MqttClient &getMqttClient();

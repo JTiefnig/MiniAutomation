@@ -46,7 +46,7 @@ void Application::init()
 
     Serial.println("Starting Control System");
 
-    // startup tasks
+    // startup tasksz
     xTaskCreatePinnedToCore(controlTasksLoop,
                             "SystemLoop",
                             16000,
@@ -90,7 +90,7 @@ void Application::miniGuiLoop(void *parameters)
 
 Application *Application::instance = nullptr;
 
-Application &Application::getInstance()
+Application &Application::inst()
 {
     if (instance == nullptr)
     {

@@ -5,15 +5,21 @@
 
 BinaryOutputHandler::BinaryOutputHandler(/* args */) : sr(PIN_SR_DATA, PIN_SR_CLOCK, PIN_SR_LATCH)
 {
-    Application &app = Application::getInstance();
-    // add all pins to the shift register as binary output
-    for (int i = 0; i < 8; i++)
-    {
-        std::string name = std::to_string(i + 1);
-        OutEntity *x = new OutEntity(name, i, this, &(app.getMqttClient()));
-    }
 }
 
 BinaryOutputHandler::~BinaryOutputHandler()
 {
+}
+
+OutEntity *BinaryOutputHandler::CreateEntity(std::string name, uint8_t pin)
+{
+    auto it = entities.find(name);
+    if (it != entities.end())
+    {
+        return it->second;
+    }
+
+    OutEntity *entity = new OutEntity(name, pin, this, &Application::inst().getMqttClient());
+    entities[name] = entity;
+    return entity;
 }

@@ -30,9 +30,7 @@ void TemperatureSensorHandler::init()
     _sensors->begin();
     int numberOfDevices = _sensors->getDeviceCount();
 
-    Application &app = Application::getInstance();
-
-    Serial.println("\n## Initializing Temperature Sensors ##");
+    Application &app = Application::inst();
 
     Preferences preferences;
     preferences.begin("tempSensors", false);

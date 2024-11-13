@@ -32,22 +32,29 @@ void setup()
 
     pinMode(LED_BUILTIN, OUTPUT); // debug Status initailisation
 
-    Application &app = Application::getInstance();
+    Application &app = Application::inst();
 
     app.init();
 
-    // example of simple control task
+    // initiate 8 OutEntities
+    for (int i = 1; i <= 8; i++)
+    {
+        BinaryOutputHandler::inst().CreateEntity(std::to_string(i), i);
+    }
+
+    // example of simple control task to publish sensor data
     app.getControlSystem().addTask(
         new ControlTask(
-            []() {},
-            1000));
+            []()
+            {
+                for (auto ent : Application::inst().getTemperatureSensorHandler().getSensorsEntities())
+                {
+                    ent->publishState();
+                }
+            },
+            2000));
 
-    GenericEntity<int> ent("myent", 3, &app.getMqttClient());
-
-    ent.set(5);
-    ent = 6;
-    int i = ent;
-    Serial.println(i);
+    // GenericEntity<int> ent("myent", 3, &app.getMqttClient());
 
     // Entity ent = app.entityHander.createEntity("mysom", 3);
     // ent.set("ON");
@@ -59,7 +66,7 @@ void setup()
 
 void loop()
 {
-    Application::getInstance().getMqttClient().loop();
+    Application::inst().getMqttClient().loop();
 
     // Over the air update
     // ArduinoOTA.handle();

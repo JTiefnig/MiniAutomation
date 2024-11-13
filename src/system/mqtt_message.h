@@ -2,17 +2,30 @@
 #define MQTT_MESSAGE_H
 #include <string>
 #include "pubsubclient.h"
+#include <utility>
 
-struct MqttMsgBase
+struct MqttMsg
 {
     std::string topic;
     // todo: an itertor hat iterates over the topic
+    std::string payload;
 
-    MqttMsgBase(const std::string topic) : topic(topic)
+    MqttMsg(const std::string topic, const std::string msg) : topic(topic), payload(msg)
     {
     }
 
-    virtual void publish(PubSubClient &client) = 0;
+    MqttMsg(const MqttMsg &msg) : topic(msg.topic), payload(msg.payload)
+    {
+    }
+
+    MqttMsg(MqttMsg &&msg) noexcept : topic(std::move(msg.topic)), payload(std::move(msg.payload))
+    {
+    }
+
+    void publish(PubSubClient &client)
+    {
+        client.publish(topic.c_str(), payload.c_str());
+    }
 
     std::vector<std::string> splitTopic() const
     {
@@ -29,18 +42,10 @@ struct MqttMsgBase
     }
 };
 
-struct MqttMsg : MqttMsgBase
+struct BinaryOutputMsg : MqttMsg
 {
-    std::string payload;
-
-    MqttMsg(const std::string topic, const std::string payload) : MqttMsgBase(topic), payload(payload)
-    {
-    }
-
-    virtual void publish(PubSubClient &client)
-    {
-        client.publish(topic.c_str(), payload.c_str());
-    }
+    const uint8_t *payload;
+    const uint8_t length;
 };
 
 // TBD messages with other types of payloads

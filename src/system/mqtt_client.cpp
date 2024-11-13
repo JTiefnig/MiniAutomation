@@ -19,21 +19,22 @@ MqttClient::CONNECTION_STATUS MqttClient::getStatus()
 
 MqttClient::MqttClient() : wifiClient(), client(wifiClient), credentials()
 {
-    sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsgBase *));
+    sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsg *));
 }
 
 MqttClient::MqttClient(const ConnectionCredentials &credentials) : wifiClient(), client(wifiClient), credentials(credentials)
 {
-    sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsgBase *));
+    sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsg *));
 }
 
 MqttClient::~MqttClient()
 {
 }
 
-void MqttClient::publish(const MqttMsgBase &msg)
+void MqttClient::publish(const MqttMsg &msg)
 {
-    xQueueSend(sendQueue, &msg, 0);
+    MqttMsg *msg_clone = new MqttMsg(msg);
+    xQueueSend(sendQueue, &msg_clone, 0);
 }
 
 void MqttClient::reconnect()
@@ -46,7 +47,7 @@ void MqttClient::reconnect()
         delay(500);
         Serial.print(".");
         // to gui
-        Application::getInstance().getGui().addMessage({"WiFi", MessageType::INFO, "Connecting to WiFi\n" + credentials.ssid, 1000});
+        Application::inst().getGui().addMessage({"WiFi", MessageType::INFO, "Connecting to WiFi\n" + credentials.ssid, 1000});
     }
 
     Serial.println("\nWiFi connected");
@@ -78,7 +79,7 @@ void MqttClient::loop()
     if (getStatus() != CONNECTION_STATUS::CONNECTED)
         reconnect();
     //
-    MqttMsgBase *currentMessage;
+    MqttMsg *currentMessage;
     while (xQueueReceive(sendQueue, &currentMessage, 0) == pdTRUE)
     {
         currentMessage->publish(client);
@@ -101,7 +102,7 @@ void MqttClient::receiveCallback(char *topic, byte *message, unsigned int length
 
     MqttMsg msg = {topic, messageTemp};
 
-    Application::getInstance().getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
+    Application::inst().getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
     //  todo: improve message rooting by custom mqtt topic callback manager
     for (auto &component : this->components)
     {
