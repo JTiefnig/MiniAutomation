@@ -79,7 +79,7 @@ public:
     }
 
     // should later serve as a gerneral interface for all updates of ui elements
-    void addMessage(GuiMessage message)
+    void addMessage(const GuiMessage &message)
     {
         auto msg = new GuiMessage(message);
         xQueueSend(InfoQueue, &msg, 0);

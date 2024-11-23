@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "mqtt_client.h"
-#include "mqtt_component.h"
+#include "mqtt_interface.h"
 #include "helpers.h"
 #include "config.h"
 #include "application.h"
@@ -17,12 +17,12 @@ MqttClient::CONNECTION_STATUS MqttClient::getStatus()
     return MqttClient::CONNECTION_STATUS::CONNECTED;
 }
 
-MqttClient::MqttClient() : wifiClient(), client(wifiClient), credentials()
+MqttClient::MqttClient() : MqttInterface(*this), wifiClient(), client(wifiClient), credentials()
 {
     sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsg *));
 }
 
-MqttClient::MqttClient(const ConnectionCredentials &credentials) : wifiClient(), client(wifiClient), credentials(credentials)
+MqttClient::MqttClient(const ConnectionCredentials &credentials) : MqttInterface(*this), wifiClient(), client(wifiClient), credentials(credentials)
 {
     sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsg *));
 }
@@ -31,9 +31,9 @@ MqttClient::~MqttClient()
 {
 }
 
-void MqttClient::publish(const MqttMsg &msg)
+void MqttClient::pushMessage(MqttMsg &msg)
 {
-    MqttMsg *msg_clone = new MqttMsg(msg);
+    MqttMsg *msg_clone = new MqttMsg(msg.addTopic(credentials.deviceId));
     xQueueSend(sendQueue, &msg_clone, 0);
 }
 

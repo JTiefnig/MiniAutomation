@@ -5,15 +5,15 @@
 #include <string>
 #include "mqtt_client.h"
 #include "mqtt_message.h"
-#include "mqtt_component.h"
+#include "mqtt_interface.h"
 #include "entity_base.h"
 
 template <typename T>
-class GenericEntity : public EntityBase, public MqttComponent
+class GenericEntity : public EntityBase, public MqttInterface
 {
 public:
     GenericEntity(const std::string name, const T &value, MqttClient *client)
-        : EntityBase(name), value(value), MqttComponent(client)
+        : EntityBase(name), value(value), MqttInterface(client)
     {
     }
 
@@ -68,8 +68,7 @@ public:
 
     virtual MqttMsg toMessage() const override
     {
-        std::string stateTopic = client->getDeviceId() + "/" + this->name;
-        return MqttMsg(stateTopic, toPayload());
+        return MqttMsg(this->topic(), toPayload());
     }
 
 private:

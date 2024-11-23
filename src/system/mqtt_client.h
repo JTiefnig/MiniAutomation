@@ -10,12 +10,10 @@
 #include <vector>
 #include "config.h"
 #include "helpers.h"
-#include "mqtt_component.h"
+#include "mqtt_interface.h"
 #include "mqtt_message.h"
 
-class MqttComponent;
-
-class MqttClient
+class MqttClient : public MqttInterface
 {
 public:
   struct ConnectionCredentials
@@ -36,8 +34,6 @@ private:
   WiFiClient wifiClient;
   ConnectionCredentials credentials;
 
-  std::vector<MqttComponent *> components;
-
 public:
   enum CONNECTION_STATUS
   {
@@ -54,7 +50,7 @@ public:
 
   // constructor with std::string parameters
 
-  ~MqttClient();
+  virtual ~MqttClient();
 
   std::string getDeviceId() const
   {
@@ -62,7 +58,6 @@ public:
   }
 
   // append the message to the queue // todo - use std::string
-  void publish(const MqttMsg &msg);
 
   void reconnect();
 
@@ -75,15 +70,7 @@ public:
     this->credentials = credentials;
   }
 
-  void addComponent(MqttComponent *component)
-  {
-    components.push_back(component);
-  }
-
-  void removeComponent(MqttComponent *component)
-  {
-    components.erase(std::remove(components.begin(), components.end(), component), components.end());
-  }
+  void pushMessage(MqttMsg &msg) override;
 };
 
 #endif

@@ -1,13 +1,8 @@
 #include "temperature_sensor.h"
 #include "helpers.h"
 
-void TemperatureEntity::process(const std::string message)
-{
-    // do nothing
-}
-
-TemperatureEntity::TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MqttClient *client)
-    : EntityBase(name), id(id), sensors(sensors), MqttComponent(client)
+TemperatureEntity::TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MqttInterface &client)
+    : MqttEntity(name, client), id(id), sensors(sensors)
 {
 }
 
@@ -19,15 +14,14 @@ float TemperatureEntity::get() const
     return temperatureC;
 }
 
-bool TemperatureEntity::processMessage(const MqttMsg &msg)
+bool TemperatureEntity::processMessage(MqttMsg &msg)
 {
     return false;
 }
 
 MqttMsg TemperatureEntity::toMessage() const
 {
-    std::string stateTopic = client->getDeviceId() + "/" + this->name;
     float temperatureReading = get();
     std::string temperatureReadingStr = std::to_string(temperatureReading);
-    return MqttMsg(stateTopic, temperatureReadingStr);
+    return MqttMsg(this->name, temperatureReadingStr);
 }

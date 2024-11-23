@@ -7,7 +7,6 @@
 struct MqttMsg
 {
     std::string topic;
-    // todo: an itertor hat iterates over the topic
     std::string payload;
 
     MqttMsg(const std::string topic, const std::string msg) : topic(topic), payload(msg)
@@ -27,6 +26,16 @@ struct MqttMsg
         client.publish(topic.c_str(), payload.c_str());
     }
 
+    MqttMsg &addTopic(const std::string &topic)
+    {
+        if (!this->topic.empty() && this->topic.back() != '/')
+        {
+            this->topic += '/';
+        }
+        this->topic += topic;
+        return *this;
+    }
+
     std::vector<std::string> splitTopic() const
     {
         std::vector<std::string> result;
@@ -41,13 +50,5 @@ struct MqttMsg
         return result;
     }
 };
-
-struct BinaryOutputMsg : MqttMsg
-{
-    const uint8_t *payload;
-    const uint8_t length;
-};
-
-// TBD messages with other types of payloads
 
 #endif //

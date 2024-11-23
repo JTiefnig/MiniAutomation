@@ -1,8 +1,9 @@
 #include "binary_output.h"
 #include "binary_output_handler.h"
+#include "mqtt_interface.h"
 
-OutEntity::OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttClient *client)
-    : EntityBase(name), pin(pin), sr(sr), MqttComponent(client), state(OFF)
+OutEntity::OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttInterface &client, State init_state)
+    : MqttEntity(name, client), pin(pin), sr(sr), state(init_state)
 {
 }
 OutEntity::~OutEntity()
@@ -29,7 +30,7 @@ void OutEntity::set(State setState)
     publishState();
 }
 
-bool OutEntity::processMessage(const MqttMsg &msg)
+bool OutEntity::processMessage(MqttMsg &msg)
 {
     std::vector<std::string> tokens = msg.splitTopic();
 
@@ -58,8 +59,7 @@ OutEntity::State OutEntity::get() const
 
 MqttMsg OutEntity::toMessage() const
 {
-    std::string stateTopic = client->getDeviceId() + "/" + this->name + "/state";
-    return MqttMsg(stateTopic, stateNames[state]);
+    return MqttMsg(this->name, stateNames[state]);
 }
 
 const char *OutEntity::stateNames[] = {"ON", "OFF"};

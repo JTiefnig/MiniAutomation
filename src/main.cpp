@@ -39,7 +39,7 @@ void setup()
     // initiate 8 OutEntities
     for (int i = 1; i <= 8; i++)
     {
-        BinaryOutputHandler::inst().CreateEntity(std::to_string(i), i);
+        BinaryOutputHandler::inst().CreateEntity(std::to_string(i), i - 1);
     }
 
     // example of simple control task to publish sensor data

@@ -1,17 +1,13 @@
 #ifndef BINARY_OUTPUT_H
 #define BINARY_OUTPUT_H
 
-#include <Arduino.h>
-#include "entity_base.h"
-#include "config.h"
-#include "mqtt_component.h"
-#include <string>
-#include "application.h"
-#include "mqtt_client.h"
+#include "binary_output_handler.h"
+#include "mqtt_entity.h"
+#include "mqtt_message.h"
 
 class BinaryOutputHandler;
 
-class OutEntity : public EntityBase, public MqttComponent
+class OutEntity : public MqttEntity
 {
 public:
     enum State
@@ -29,14 +25,14 @@ private:
     BinaryOutputHandler *sr;
 
 public:
-    OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttClient *client);
-    ~OutEntity();
+    OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttInterface &client, State init_state = OFF);
+    virtual ~OutEntity();
 
     void set(State state);
 
-    bool processMessage(const MqttMsg &msg) override;
+    bool processMessage(MqttMsg &msg) override;
 
-    virtual MqttMsg toMessage() const override;
+    MqttMsg toMessage() const override;
 
     State get() const;
 };

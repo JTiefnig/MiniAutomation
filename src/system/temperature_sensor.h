@@ -5,30 +5,27 @@
 #include <DallasTemperature.h>
 #include <string>
 #include <sstream>
-#include "mqtt_client.h"
-#include "entity_base.h"
+#include "mqtt_entity.h"
 #include "temperature_sensor_handler.h"
-#include "mqtt_component.h"
+#include "mqtt_message.h"
 
 class TemperatureSensorHandler;
 
-class TemperatureEntity : public EntityBase, public MqttComponent
+class TemperatureEntity : public MqttEntity
 {
 private:
     uint8_t id;
     TemperatureSensorHandler *sensors;
 
 public:
-    virtual void process(const std::string message);
+    TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MqttInterface &client);
+    virtual ~TemperatureEntity();
 
-    TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MqttClient *client);
-    ~TemperatureEntity();
-
-    virtual bool processMessage(const MqttMsg &msg) override;
-
-    virtual MqttMsg toMessage() const override;
+    virtual bool processMessage(MqttMsg &msg);
 
     float get() const;
+
+    virtual MqttMsg toMessage() const;
 };
 
 #endif
