@@ -32,11 +32,11 @@ public:
 
     bool processMessage(const MqttMsg &msg) override
     {
-        std::vector<std::string> tokens = msg.splitTopic();
-        if (tokens.size() != 3)
+        std::vector<std::string> tokens = msg.getTopicPath();
+        if (tokens.size() != 2)
             return false;
 
-        if (tokens[1] == this->name && tokens[2] == "set")
+        if (tokens[0] == this->name && tokens[1] == "set")
         {
             fromPayload(msg.payload);
             return true;

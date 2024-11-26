@@ -23,5 +23,5 @@ MqttMsg TemperatureEntity::toMessage() const
 {
     float temperatureReading = get();
     std::string temperatureReadingStr = std::to_string(temperatureReading);
-    return MqttMsg(this->name, temperatureReadingStr);
+    return MqttMsg(temperatureReadingStr);
 }

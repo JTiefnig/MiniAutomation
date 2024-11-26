@@ -33,7 +33,7 @@ MqttClient::~MqttClient()
 
 void MqttClient::pushMessage(MqttMsg &msg)
 {
-    MqttMsg *msg_clone = new MqttMsg(msg.addTopic(credentials.deviceId));
+    MqttMsg *msg_clone = new MqttMsg(msg.addTopicToken(credentials.deviceId));
     xQueueSend(sendQueue, &msg_clone, 0);
 }
 
@@ -68,6 +68,8 @@ void MqttClient::reconnect()
         client.connect(credentials.deviceId.c_str(), credentials.mqtt_user.c_str(), credentials.mqtt_password.c_str());
         delay(500);
         Serial.print(".");
+        // to gui
+        Application::inst().getGui().addMessage({"MQTT-Connect", MessageType::INFO, "Connecting to MQTT\n" + credentials.mqtt_server, 1000});
     }
     Serial.println("MQTT connected");
 
@@ -96,16 +98,16 @@ void MqttClient::receiveCallback(char *topic, byte *message, unsigned int length
 
     for (int i = 0; i < length; i++)
     {
-        Serial.print((char)message[i]);
+        // Serial.print((char)message[i]);
         messageTemp += (char)message[i];
     }
 
-    MqttMsg msg = {topic, messageTemp};
+    MqttMsg msg(topic, messageTemp);
 
-    Application::inst().getGui().addMessage({msg.topic, MessageType::INFO, msg.topic + " - " + msg.payload, 3000});
+    Application::inst().getGui().addMessage({msg.getTopic(), MessageType::INFO, msg.getTopic() + " - " + msg.getPayload(), 2000});
     //  todo: improve message rooting by custom mqtt topic callback manager
-    for (auto &component : this->components)
-    {
-        component->processMessage(msg);
-    }
+
+    // only one component can process the message
+
+    this->processMessage(msg);
 }

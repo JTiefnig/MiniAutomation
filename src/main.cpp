@@ -43,6 +43,7 @@ void setup()
     }
 
     // example of simple control task to publish sensor data
+
     app.getControlSystem().addTask(
         new ControlTask(
             []()

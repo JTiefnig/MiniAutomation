@@ -70,7 +70,12 @@ public:
     this->credentials = credentials;
   }
 
-  void pushMessage(MqttMsg &msg) override;
+  virtual void pushMessage(MqttMsg &msg) override;
+
+  virtual std::string getTopic() override
+  {
+    return credentials.deviceId;
+  }
 };
 
 #endif

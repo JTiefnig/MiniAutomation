@@ -19,6 +19,11 @@ public:
 
     virtual MqttMsg toMessage() const = 0;
 
+    virtual std::string getTopic() override
+    {
+        return getName();
+    }
+
     virtual void publishState() override
     {
         MqttMsg msg = toMessage();

@@ -16,6 +16,8 @@ public:
     MqttInterface(MqttInterface &mqtt_int);
     virtual ~MqttInterface();
 
+    virtual std::string getTopic() = 0;
+
     virtual bool processMessage(MqttMsg &msg);
     virtual void pushMessage(MqttMsg &msg);
     virtual void publishState();

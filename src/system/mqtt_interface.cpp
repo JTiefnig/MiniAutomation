@@ -20,7 +20,14 @@ void MqttInterface::publishState()
 
 bool MqttInterface::processMessage(MqttMsg &msg)
 {
-    // only one component can process the message
+    if (msg.getTopicPath().empty())
+        return false;
+
+    if (msg.getTopicPath().front() != this->getTopic())
+        return false;
+
+    msg.popFirstTopic();
+
     for (auto component : components)
     {
         if (component->processMessage(msg))
@@ -33,11 +40,12 @@ bool MqttInterface::processMessage(MqttMsg &msg)
 
 void MqttInterface::pushMessage(MqttMsg &msg)
 {
-    this->mqtt_int.pushMessage(msg);
+    this->mqtt_int.pushMessage(msg.addTopicToken(this->getTopic()));
 }
 
 void MqttInterface::addComponent(MqttInterface *component)
 {
+
     components.push_back(component);
 }
 
