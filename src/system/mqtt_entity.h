@@ -19,7 +19,7 @@ public:
 
     virtual MqttMsg toMessage() const = 0;
 
-    virtual std::string getTopic() override
+    virtual std::string getTopic() const override
     {
         return getName();
     }

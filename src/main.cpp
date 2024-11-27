@@ -19,6 +19,8 @@
 #include "system/control_task_scheduler.h"
 #include "system/application.h"
 #include "system/generic_Entity.h"
+#include "control_tasks/heatingController.h"
+#include "system/fixed_state_entity.h"
 
 #define VERSION "0.0.1"
 
@@ -43,7 +45,6 @@ void setup()
     }
 
     // example of simple control task to publish sensor data
-
     app.getControlSystem().addTask(
         new ControlTask(
             []()
@@ -55,6 +56,30 @@ void setup()
             },
             2000));
 
+    auto genericEnt = new GenericEntity<int>("timerTest", 97, dynamic_cast<MqttInterface &>(app.getMqttClient()));
+    app.getControlSystem().addTask(
+        new ControlTask(
+            [genericEnt]()
+            {
+                int val = *genericEnt + 1;
+                if (val > 100)
+                    *genericEnt = 100;
+                else
+                    *genericEnt = val;
+
+                Application::inst().getGui().addMessage({"TimerTest", MessageType::INFO, "TimerTest: " + std::to_string(*genericEnt), 1000});
+                // genericEnt->publishState();
+            },
+            1000));
+
+    // example of a fixed state entity with 3 states and callback
+    auto fixedStateEnt = new FixedStateEntity("boiler", dynamic_cast<MqttInterface &>(app.getMqttClient()), {"off", "auto", "manual"});
+    fixedStateEnt->addCallback([](const EntityBase &ent)
+                               { Serial.println(("Callback: " + ent.getName()).c_str()); });
+
+    auto eu_heating_test = new HeatingController("heat_test", dynamic_cast<MqttInterface &>(app.getMqttClient()));
+
+    app.getControlSystem().addTask(eu_heating_test);
     // GenericEntity<int> ent("myent", 3, &app.getMqttClient());
 
     // Entity ent = app.entityHander.createEntity("mysom", 3);
@@ -62,6 +87,7 @@ void setup()
     // ent.addcallback([](std::string msg) { Serial.println(msg.c_str()); });
 
     // just a delay to ensrue full initalisation of threads
+    Serial.println("MPLC Booted");
     vTaskDelay(500 / portTICK_PERIOD_MS);
 }
 

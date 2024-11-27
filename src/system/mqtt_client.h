@@ -72,7 +72,7 @@ public:
 
   virtual void pushMessage(MqttMsg &msg) override;
 
-  virtual std::string getTopic() override
+  virtual std::string getTopic() const override
   {
     return credentials.deviceId;
   }

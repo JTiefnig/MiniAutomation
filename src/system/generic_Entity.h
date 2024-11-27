@@ -5,15 +5,14 @@
 #include <string>
 #include "mqtt_client.h"
 #include "mqtt_message.h"
-#include "mqtt_interface.h"
-#include "entity_base.h"
+#include "mqtt_entity.h"
 
 template <typename T>
-class GenericEntity : public EntityBase, public MqttInterface
+class GenericEntity : public MqttEntity
 {
+
 public:
-    GenericEntity(const std::string name, const T &value, MqttClient *client)
-        : EntityBase(name), value(value), MqttInterface(client)
+    GenericEntity(const std::string name, const T &value, MqttInterface &mqtt_interface) : MqttEntity(name, mqtt_interface), value(value)
     {
     }
 
@@ -28,17 +27,18 @@ public:
             return;
         value = newValue;
         callCallbacks();
+        publishState();
     }
 
-    bool processMessage(const MqttMsg &msg) override
+    virtual bool processMessage(MqttMsg &msg) override
     {
         std::vector<std::string> tokens = msg.getTopicPath();
         if (tokens.size() != 2)
             return false;
 
-        if (tokens[0] == this->name && tokens[1] == "set")
+        if (tokens[0] == this->getTopic() && tokens[1] == "set")
         {
-            fromPayload(msg.payload);
+            fromPayload(msg.getPayload());
             return true;
         }
         return false;
@@ -68,7 +68,7 @@ public:
 
     virtual MqttMsg toMessage() const override
     {
-        return MqttMsg(this->topic(), toPayload());
+        return MqttMsg(toPayload());
     }
 
 private:
