@@ -1,6 +1,6 @@
 #include "mqtt_interface.h"
 
-MqttInterface::MqttInterface(MqttInterface &mqtt_int) : mqtt_int(mqtt_int)
+MqttInterface::MqttInterface(MqttInterface *mqtt_int) : mqtt_int(mqtt_int)
 {
     this->mqtt_int.addComponent(this);
 }
@@ -20,14 +20,6 @@ void MqttInterface::publishState()
 
 bool MqttInterface::processMessage(MqttMsg &msg)
 {
-    if (msg.getTopicPath().empty())
-        return false;
-
-    if (msg.getTopicPath().front() != this->getTopic())
-        return false;
-
-    msg.popFirstTopic();
-
     for (auto component : components)
     {
         if (component->processMessage(msg))
@@ -40,12 +32,11 @@ bool MqttInterface::processMessage(MqttMsg &msg)
 
 void MqttInterface::pushMessage(MqttMsg &msg)
 {
-    this->mqtt_int.pushMessage(msg.addTopicToken(this->getTopic()));
+    this->mqtt_int.pushMessage(msg);
 }
 
 void MqttInterface::addComponent(MqttInterface *component)
 {
-
     components.push_back(component);
 }
 

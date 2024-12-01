@@ -6,8 +6,6 @@
 #include <sstream>
 #include <Preferences.h>
 
-extern Application app;
-
 TemperatureSensorHandler::TemperatureSensorHandler()
 {
     _wire = new OneWire(ONE_WIRE_BUS);

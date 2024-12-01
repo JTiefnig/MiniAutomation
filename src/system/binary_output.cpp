@@ -2,7 +2,7 @@
 #include "binary_output_handler.h"
 #include "mqtt_interface.h"
 
-OutEntity::OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttInterface &client, State init_state)
+OutEntity::OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttInterface *client, State init_state)
     : MqttEntity(name, client), pin(pin), sr(sr), state(init_state)
 {
     publishState();

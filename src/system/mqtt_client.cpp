@@ -5,8 +5,6 @@
 #include "config.h"
 #include "application.h"
 
-extern Application app;
-
 MqttClient::CONNECTION_STATUS MqttClient::getStatus()
 {
     if (WiFi.status() != WL_CONNECTED)
@@ -17,12 +15,12 @@ MqttClient::CONNECTION_STATUS MqttClient::getStatus()
     return MqttClient::CONNECTION_STATUS::CONNECTED;
 }
 
-MqttClient::MqttClient() : MqttInterface(*this), wifiClient(), client(wifiClient), credentials()
+MqttClient::MqttClient() : MqttInterface(this), wifiClient(), client(wifiClient), credentials()
 {
     sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsg *));
 }
 
-MqttClient::MqttClient(const ConnectionCredentials &credentials) : MqttInterface(*this), wifiClient(), client(wifiClient), credentials(credentials)
+MqttClient::MqttClient(const ConnectionCredentials &credentials) : MqttInterface(this), wifiClient(), client(wifiClient), credentials(credentials)
 {
     sendQueue = xQueueCreate(send_queue_len, sizeof(MqttMsg *));
 }

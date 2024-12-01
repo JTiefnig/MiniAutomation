@@ -1,16 +1,15 @@
 #ifndef MQTT_ENTITY_H
 #define MQTT_ENTITY_H
 #include <string>
-#include "mqtt_interface.h"
+#include "mqtt_component.h"
 #include "entity_base.h"
 #include "mqtt_message.h"
 
-class MqttEntity : public EntityBase, public MqttInterface
+class MqttEntity : public EntityBase, public MqttComponent
 {
-
 public:
-    MqttEntity(std::string name, MqttInterface &client) : EntityBase(name),
-                                                          MqttInterface(client)
+    MqttEntity(std::string name, MqttInterface *client) : EntityBase(name),
+                                                          MqttComponent(client)
     {
     }
     virtual ~MqttEntity() {}

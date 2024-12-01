@@ -1,7 +1,7 @@
 #pragma once
 
 #include "control_task.h"
-#include "../system/mqtt_interface.h"
+#include "../system/mqtt_component.h"
 #include "../system/mqtt_message.h"
 #include <string>
 #include <vector>
@@ -9,7 +9,7 @@
 #include "../system/fixed_state_entity.h"
 #include <math.h>
 
-class HeatingController : public ControlTaskBase, public MqttInterface
+class HeatingController : public ControlTaskBase, public MqttComponent
 {
     std::string name;
     FixedStateEntity modeState;
@@ -17,8 +17,8 @@ class HeatingController : public ControlTaskBase, public MqttInterface
     GenericEntity<float> currentTemp;
 
 public:
-    HeatingController(std::string controller_name, MqttInterface &mqtt_interface) : name(controller_name),
-                                                                                    ControlTaskBase(5000), MqttInterface(mqtt_interface),
+    HeatingController(std::string controller_name, MqttInterface *mqtt_interface) : name(controller_name),
+                                                                                    ControlTaskBase(5000), MqttComponent(mqtt_interface),
                                                                                     modeState("mode", *this, {"off", "auto", "heat"}),
                                                                                     setTemp("temp", 20.0, *this),
                                                                                     currentTemp("current_temp", 15.0, *this)

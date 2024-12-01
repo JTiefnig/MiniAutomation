@@ -9,13 +9,15 @@
 #include "binary_output_handler.h"
 #include "entity_handler.h"
 #include <Preferences.h>
+#include "mqtt_component.h"
 
-class Application
+class Application : public MqttComponent
 {
 private:
     MiniGUI gui;
-    ControlTaskScheduler contorlSystem;
+
     MqttClient mqttClient;
+    ControlTaskScheduler contorlSystem;
 
     TemperatureSensorHandler temperatureSensorHandler;
 
@@ -24,6 +26,8 @@ private:
     ~Application();
 
     static Application *instance;
+
+    std::string name;
 
 public:
     static Application &inst();
@@ -38,6 +42,11 @@ public:
     TemperatureSensorHandler &getTemperatureSensorHandler()
     {
         return this->temperatureSensorHandler;
+    }
+
+    std::string getTopic() const override
+    {
+        return "esp32"; 
     }
 
     void init();

@@ -25,7 +25,7 @@ private:
     BinaryOutputHandler *sr;
 
 public:
-    OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttInterface &client, State init_state = OFF);
+    OutEntity(std::string name, int pin, BinaryOutputHandler *sr, MqttInterface *client, State init_state = OFF);
     virtual ~OutEntity();
 
     void set(State state);

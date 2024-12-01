@@ -77,7 +77,7 @@ void setup()
     fixedStateEnt->addCallback([](const EntityBase &ent)
                                { Serial.println(("Callback: " + ent.getName()).c_str()); });
 
-    auto eu_heating_test = new HeatingController("heat_test", dynamic_cast<MqttInterface &>(app.getMqttClient()));
+    auto eu_heating_test = new HeatingController("heat_test", &app);
 
     app.getControlSystem().addTask(eu_heating_test);
     // GenericEntity<int> ent("myent", 3, &app.getMqttClient());
