@@ -12,7 +12,7 @@ class GenericEntity : public MqttEntity
 {
 
 public:
-    GenericEntity(const std::string name, const T &value, MqttInterface &mqtt_interface) : MqttEntity(name, mqtt_interface), value(value)
+    GenericEntity(const std::string name, const T &value, MqttInterface *mqtt_interface) : MqttEntity(name, mqtt_interface), value(value)
     {
     }
 

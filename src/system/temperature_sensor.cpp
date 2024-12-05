@@ -1,8 +1,8 @@
 #include "temperature_sensor.h"
 #include "helpers.h"
 
-TemperatureEntity::TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MqttInterface &client)
-    : MqttEntity(name, client), id(id), sensors(sensors)
+TemperatureEntity::TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MqttInterface *interface)
+    : MqttEntity(name, interface), id(id), sensors(sensors)
 {
 }
 

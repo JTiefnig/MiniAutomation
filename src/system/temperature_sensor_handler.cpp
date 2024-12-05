@@ -48,7 +48,7 @@ void TemperatureSensorHandler::init()
 
         // create senor entity
         // This function should later assign the IDs correctly from EEPROM data
-        sensors_entities.push_back(new TemperatureEntity(name, i, this, dynamic_cast<MqttInterface &>(app.getMqttClient())));
+        sensors_entities.push_back(new TemperatureEntity(name, i, this, &Application::inst()));
 
         Serial.printf("\nTempSensor %i: ", i);
         Serial.println(address.c_str());

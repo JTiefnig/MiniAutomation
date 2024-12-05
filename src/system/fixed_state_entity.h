@@ -13,8 +13,8 @@ private:
     std::vector<std::string> stateNames;
 
 public:
-    FixedStateEntity(std::string name, MqttInterface &client, const std::vector<std::string> &stateNames, int state = 0)
-        : MqttEntity(name, client), state(state), stateNames(stateNames)
+    FixedStateEntity(std::string name, MqttInterface *interface, const std::vector<std::string> &stateNames, int state = 0)
+        : MqttEntity(name, interface), state(state), stateNames(stateNames)
     {
     }
     virtual ~FixedStateEntity() {}

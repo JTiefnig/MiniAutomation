@@ -18,8 +18,8 @@ OutEntity *BinaryOutputHandler::CreateEntity(std::string name, uint8_t pin)
     {
         return it->second;
     }
-    MqttClient &mqtt = Application::inst().getMqttClient();
-    OutEntity *entity = new OutEntity(name, pin, this, dynamic_cast<MqttInterface &>(mqtt));
+
+    OutEntity *entity = new OutEntity(name, pin, this, &Application::inst());
     entities[name] = entity;
     return entity;
 }

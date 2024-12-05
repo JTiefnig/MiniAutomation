@@ -56,7 +56,7 @@ void setup()
             },
             2000));
 
-    auto genericEnt = new GenericEntity<int>("timerTest", 97, dynamic_cast<MqttInterface &>(app.getMqttClient()));
+    auto genericEnt = new GenericEntity<int>("timerTest", 97, &app);
     app.getControlSystem().addTask(
         new ControlTask(
             [genericEnt]()
@@ -73,7 +73,7 @@ void setup()
             1000));
 
     // example of a fixed state entity with 3 states and callback
-    auto fixedStateEnt = new FixedStateEntity("boiler", dynamic_cast<MqttInterface &>(app.getMqttClient()), {"off", "auto", "manual"});
+    auto fixedStateEnt = new FixedStateEntity("boiler", &app, {"off", "auto", "manual"});
     fixedStateEnt->addCallback([](const EntityBase &ent)
                                { Serial.println(("Callback: " + ent.getName()).c_str()); });
 

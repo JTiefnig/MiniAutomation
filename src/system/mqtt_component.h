@@ -11,7 +11,6 @@ public:
 
     bool processMessage(MqttMsg &msg) override;
     void pushMessage(MqttMsg &msg) override;
-    virtual void publishState();
 
     virtual std::string getTopic() const = 0;
 };

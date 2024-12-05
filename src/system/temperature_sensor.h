@@ -18,7 +18,7 @@ private:
     TemperatureSensorHandler *sensors;
 
 public:
-    TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MqttInterface &client);
+    TemperatureEntity(std::string name, uint8_t id, TemperatureSensorHandler *sensors, MqttInterface *interface);
     virtual ~TemperatureEntity();
 
     virtual bool processMessage(MqttMsg &msg);

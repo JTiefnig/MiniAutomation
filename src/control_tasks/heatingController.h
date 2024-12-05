@@ -19,9 +19,9 @@ class HeatingController : public ControlTaskBase, public MqttComponent
 public:
     HeatingController(std::string controller_name, MqttInterface *mqtt_interface) : name(controller_name),
                                                                                     ControlTaskBase(5000), MqttComponent(mqtt_interface),
-                                                                                    modeState("mode", *this, {"off", "auto", "heat"}),
-                                                                                    setTemp("temp", 20.0, *this),
-                                                                                    currentTemp("current_temp", 15.0, *this)
+                                                                                    modeState("mode", this, {"off", "auto", "heat"}),
+                                                                                    setTemp("temp", 20.0, this),
+                                                                                    currentTemp("current_temp", 15.0, this)
     {
         modeState.publishState();
         setTemp.publishState();

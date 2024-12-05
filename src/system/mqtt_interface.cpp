@@ -2,12 +2,12 @@
 
 MqttInterface::MqttInterface(MqttInterface *mqtt_int) : mqtt_int(mqtt_int)
 {
-    this->mqtt_int.addComponent(this);
+    this->mqtt_int->addComponent(this);
 }
 
 MqttInterface::~MqttInterface()
 {
-    this->mqtt_int.removeComponent(this);
+    this->mqtt_int->removeComponent(this);
 }
 
 void MqttInterface::publishState()
@@ -32,7 +32,7 @@ bool MqttInterface::processMessage(MqttMsg &msg)
 
 void MqttInterface::pushMessage(MqttMsg &msg)
 {
-    this->mqtt_int.pushMessage(msg);
+    this->mqtt_int->pushMessage(msg);
 }
 
 void MqttInterface::addComponent(MqttInterface *component)

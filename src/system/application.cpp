@@ -1,7 +1,7 @@
 #include "application.h"
 
 Application::Application()
-    : gui(), contorlSystem(), mqttClient(), MqttComponent(*mqttClient)
+    : gui(), contorlSystem(), mqttClient(), MqttComponent(&mqttClient)
 {
 }
 

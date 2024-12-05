@@ -23,5 +23,5 @@ bool MqttComponent::processMessage(MqttMsg &msg)
 
 void MqttComponent::pushMessage(MqttMsg &msg)
 {
-    this->mqtt_int.pushMessage(msg.addTopicToken(this->getTopic()));
+    this->mqtt_int->pushMessage(msg.addTopicToken(this->getTopic()));
 }
